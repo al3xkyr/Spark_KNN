@@ -1,21 +1,11 @@
 package org.sparkexample.classifiers1;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
-import org.sparkexample.pojo1.PojoRow;
-
-import scala.Tuple2;
+import java.util.Vector;
 
 public class NafiBayesModel {
-	public static ArrayList<Double> possibilityOfXgivenCgood = new ArrayList<Double>();
-	public static ArrayList<Double> possibilityOfXgivenCbad = new ArrayList<Double>();
+	public static Vector<Double> possibilityOfXgivenCgood = new Vector<Double>();
+	public static Vector<Double> possibilityOfXgivenCbad = new Vector<Double>();
 		// edw ginetai to classification
 	public static Double classify(double[] ds, double possibilityOfCgood, double possibilityOfCbad) {
 
