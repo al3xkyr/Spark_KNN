@@ -7,12 +7,12 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.ml.classification.KNNClassificationModel;
 import org.apache.spark.ml.classification.KNNClassifier;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.linalg.Vectors;
-import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -243,6 +243,9 @@ public class CustomNaiveBayes {
 		
 		// end of knn 
 		
+		// have to put in type of  < Integer , PojoRow > where 
+		// Integer is the nth element of feature array Pojorow contains the array 
+		
 		
 		
 		// In order to calculate model of naive bayes 
@@ -258,17 +261,63 @@ public class CustomNaiveBayes {
 
 			public Boolean call(PojoRow v1) throws Exception {
 				if (v1.getLabel() == 1.0 ){
-					
 					return true ;
 				}
 				return false;
 			}
 			}).cache();
+		JavaRDD<PojoRow> badTweetMap = trainingData.filter(new Function<PojoRow, Boolean>() {
+
+			private static final long serialVersionUID = 1L;
+
+			public Boolean call(PojoRow v1) throws Exception {
+				if (v1.getLabel() == 0.0) {
+					return true;
+				}
+				return false;
+			}
+		}).cache();
+
 		// p(c=1) pithanotita twn kalwn tweets sto set
 		long goodTweetMapNumber = goodTweetMap.count();
+		long badTweetMapNumber = badTweetMap.count();
 		final Double probabilityCequalsGoodtweet = goodTweetMap.count()/trainingDataCount;
 		final Double probabilityCequalsBadTweet = 1 - probabilityCequalsGoodtweet;
-		// ypologismos twn p(Xi|C)
+		
+		// In order to decouple algorithm from the specific features 
+		// i have to hold it on an array of 
+		PojoRow pojoOfSumOfGoodTweets = goodTweetMap.reduce(new Function2<PojoRow, PojoRow, PojoRow>() {
+			
+			public PojoRow call(PojoRow v1, PojoRow v2) throws Exception {
+				// TODO Auto-generated method stub
+				double[] v1Array = v1.features.toArray();
+				double[] v2Array = v2.features.toArray();
+				double[] vSumArray = new double[v1.features.size()] ;
+				for (int i = 0 ; i < v1Array.length ; i ++){
+					vSumArray[i]= v1Array[i]+v2Array[i];
+				}
+				return 
+				new PojoRow(v1.label, Vectors.dense(vSumArray));
+			}
+		});
+		PojoRow pojoOfSumOfBadTweets = badTweetMap.reduce(new Function2<PojoRow, PojoRow, PojoRow>() {
+
+			public PojoRow call(PojoRow v1, PojoRow v2) throws Exception {
+				// TODO Auto-generated method stub
+				double[] v1Array = v1.features.toArray();
+				double[] v2Array = v2.features.toArray();
+				double[] vSumArray = new double[v1.features.size()];
+				for (int i = 0; i < v1Array.length; i++) {
+					vSumArray[i] = v1Array[i] + v2Array[i];
+				}
+				return new PojoRow(v1.label, Vectors.dense(vSumArray));
+			}
+		});
+		PojoRow pojoOfProbabilitiesOfGoodTweets = addPosibilitiesBasedOnSumsforGoodTweets(pojoOfSumOfGoodTweets , goodTweetMapNumber);
+		PojoRow pojoOfProbabilitiesOfBadTweets = addPosibilitiesBasedOnSumsforBadTweets(pojoOfSumOfBadTweets , badTweetMapNumber);
+		
+		
+ 		// ypologismos twn p(Xi|C)
 		Double mapPositiveswnGivenGood = (double) trainingData.filter(new Function<PojoRow, Boolean>() {
 			
 			private static final long serialVersionUID = 1L;
@@ -301,6 +350,7 @@ public class CustomNaiveBayes {
 			}).count()/(trainingDataCount - goodTweetMapNumber));
 		NafiBayesModel.possibilityOfXgivenCbad.add(mapPositiveswnGivenBad);
 		// stands for sum of negative labeled tweets
+		
 		
 		Double mapNegativeswnGivenGood = (double) trainingData.filter(new Function<PojoRow, Boolean>() {
 			
@@ -600,7 +650,7 @@ public class CustomNaiveBayes {
 			public Boolean call(Tuple2<Double, Double> pl) {
 				return pl._1().equals(pl._2());
 			}
-		}).count() / (double) testData.count();
+		}).count() / (double) testDataForValidation.count();
 		
 		
 		
@@ -872,6 +922,49 @@ public class CustomNaiveBayes {
 		
 	}
 	
+	/**
+	 Add to a PojoRow the posibilities of each feature / count of features that have bad label 
+	 * add to NafiBayesModel those features
+	 * @param pojoOfSumOfBadTweets
+	 * @param badTweetMapNumber
+	 * @return
+	 */
+
+	private static PojoRow addPosibilitiesBasedOnSumsforBadTweets(PojoRow pojoOfSumOfBadTweets, long badTweetMapNumber) {
+		// TODO Auto-generated method stub
+				double[]  arrayOfFeatures = pojoOfSumOfBadTweets.features.toArray();
+				double[]  arrayOfProbabilitites = new double [arrayOfFeatures.length];
+				NafiBayesModel.possibilityOfXgivenCbad.clear();
+				for ( int i = 0 ; i < arrayOfFeatures.length ; i ++){
+					arrayOfProbabilitites[i] = arrayOfFeatures[i]/badTweetMapNumber;
+					NafiBayesModel.possibilityOfXgivenCbad.add(arrayOfFeatures[i]/badTweetMapNumber);
+				}		
+				return new PojoRow(pojoOfSumOfBadTweets.label, Vectors.dense(arrayOfProbabilitites));
+	}
+
+
+	/**
+	 * Add to a PojoRow the posibilities of each feature / count of features that have good label 
+	 * add to NafiBayesModel those features
+	 * @param pojoOfSumOfGoodTweets
+	 * @param goodTweetMapNumber
+	 * @return
+	 */
+	private static PojoRow addPosibilitiesBasedOnSumsforGoodTweets(PojoRow pojoOfSumOfGoodTweets, long goodTweetMapNumber) {
+		// TODO Auto-generated method stub
+		double[]  arrayOfFeatures = pojoOfSumOfGoodTweets.features.toArray();
+		double[]  arrayOfProbabilitites = new double [arrayOfFeatures.length];
+		NafiBayesModel.possibilityOfXgivenCgood.clear();
+		for ( int i = 0 ; i < arrayOfFeatures.length ; i ++){
+			arrayOfProbabilitites[i] = arrayOfFeatures[i]/goodTweetMapNumber;
+			NafiBayesModel.possibilityOfXgivenCgood.add(arrayOfFeatures[i]/goodTweetMapNumber);
+		}
+		
+		
+		return new PojoRow(pojoOfSumOfGoodTweets.label, Vectors.dense(arrayOfProbabilitites));
+	}
+
+
 
 	public static boolean doesModelNeedRetrain(JavaRDD<PojoRow> trainingData ,JavaRDD<PojoRow> testData ){
 		if((getEntropyOfADataSet(testData) - getEntropyOfADataSet(trainingData)) < 0.1 
