@@ -271,7 +271,6 @@ public class CustomNaiveBayes {
 								probabilityCequalsGoodtweet, probabilityCequalsBadTweet), p.getLabel());
 					}
 				});
-		dom = predictionAndLabelForTestDataForValidationwithOldModel.collect();
 		double acccuracyOnTestDataForValidationWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
 				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
 
