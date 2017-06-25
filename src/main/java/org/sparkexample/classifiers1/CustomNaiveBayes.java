@@ -261,7 +261,7 @@ public class CustomNaiveBayes {
 
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
-		JavaPairRDD<Double, Double> predictionAndLabelForTestDataForValidationwithOldModel = testDataForValidation
+		JavaPairRDD<Double, Double> predictionAndLabelForTestDataForValidationwithOldModel = testData
 				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
 
 					private static final long serialVersionUID = 1L;
@@ -271,7 +271,7 @@ public class CustomNaiveBayes {
 								probabilityCequalsGoodtweet, probabilityCequalsBadTweet), p.getLabel());
 					}
 				});
-		double acccuracyOnTestDataForValidationWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
+		double acccuracyOnTestDataWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
 				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
 
 					private static final long serialVersionUID = 1L;
@@ -279,12 +279,12 @@ public class CustomNaiveBayes {
 					public Boolean call(Tuple2<Double, Double> pl) {
 						return pl._1().equals(pl._2());
 					}
-				}).count() / (double) testDataForValidation.count();
+				}).count() / (double) testData.count();
 
 		// Creating a new rdd of predictions of Naive old model and feautres in
 		// order to calculate Entropy of it
 
-		JavaRDD<PojoRow> testDataForValidationWithOldModelPredicted = testDataForValidation
+		JavaRDD<PojoRow> testDataForValidationWithOldModelPredicted = testData
 				.map(new Function<PojoRow, PojoRow>() {
 
 					public PojoRow call(PojoRow v1) throws Exception {
@@ -306,7 +306,7 @@ public class CustomNaiveBayes {
 			// val.transform(labeledPointDataset, model.topTree(),
 			// model.subTrees());
 			// Creation of Dataset of testData for KNN
-			Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testData, PojoRow.class);
+			Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testDataForValidation, PojoRow.class);
 
 			Dataset<Row> sss = model.transform(labeledPointDatasetforTest);
 			sss.show();
@@ -320,7 +320,7 @@ public class CustomNaiveBayes {
 							return new Tuple2<Double, Double>(t.getDouble(0), t.getDouble(1));
 						}
 					});
-			double accuracyOfKNNOnTestData = ewo.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+			double accuracyOfKNNOntestDataForValidation = ewo.filter(new Function<Tuple2<Double, Double>, Boolean>() {
 
 				public Boolean call(Tuple2<Double, Double> v1) throws Exception {
 					// TODO Auto-generated method stub
@@ -329,8 +329,8 @@ public class CustomNaiveBayes {
 					}
 					return false;
 				}
-			}).count() / (double) (testData.count());
-			System.out.println("the accuaracy of knn is " + accuracyOfKNNOnTestData);
+			}).count() / (double) (testDataForValidation.count());
+			System.out.println("the accuaracy of knn is " + accuracyOfKNNOntestDataForValidation);
 
 			// creating new rdd with label the prediction on test data
 			JavaRDD<PojoRow> trainDataForNaiveWithPredictionsOfKNN = j32.select("prediction", "features").toJavaRDD()
@@ -341,7 +341,6 @@ public class CustomNaiveBayes {
 							return new PojoRow((Double) t.get(0), (Vector) t.get(1));
 						}
 					});
-			boolean needsRetrain = doesModelNeedRetrain(trainingData, trainDataForNaiveWithPredictionsOfKNN);
 			List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN
 					.collect();
 			// List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData =
@@ -428,7 +427,7 @@ public class CustomNaiveBayes {
 			final double probabilityCequalsGoodtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsGoodtweetAmmendedbytestDatafromKNN;
 			final double probabilityCequalsBadtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
 
-			JavaPairRDD<Double, Double> predictionAndLabelForTestDataforValidationwithNewModel = testDataForValidation
+			JavaPairRDD<Double, Double> predictionAndLabelForTestDataforValidationwithNewModel = testData
 					.mapToPair(new PairFunction<PojoRow, Double, Double>() {
 
 						private static final long serialVersionUID = 1L;
@@ -449,10 +448,10 @@ public class CustomNaiveBayes {
 						public Boolean call(Tuple2<Double, Double> pl) {
 							return pl._1().equals(pl._2());
 						}
-					}).count() / (double) testDataForValidation.count();
+					}).count() / (double) testData.count();
 
 			System.out.println("The accuracy of Old naive model with dataForValidation is "
-					+ acccuracyOnTestDataForValidationWithOldModel);
+					+ acccuracyOnTestDataWithOldModel);
 			System.out.println("The accuracy of new naive model with dataForValidation is "
 					+ accuracyonTestDataForValidationwithNewModel);
 
@@ -512,7 +511,12 @@ public class CustomNaiveBayes {
 		// based on the assumption of the training dataset is chosed to be
 		// balanced about positive and negative tweets
 		// which means the entropy of it is close to 1
-		if ((entropyOfTrainDataset - entropyOfTestDataSet) > 0.1) {
+		/*if ((entropyOfTrainDataset - entropyOfTestDataSet) > 0.1) {
+			return true;
+		}
+		return false;*/
+		// dummy logic in order to continue with ammending
+		if ((entropyOfTrainDataset != entropyOfTestDataSet)) {
 			return true;
 		}
 		return false;
