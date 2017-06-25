@@ -174,7 +174,7 @@ public class CustomNaiveBayes {
 		});
 
 		// Split the data into training and test sets (30% held out for testing)
-		JavaRDD<PojoRow>[] splits = labeledPointJavaRDD.randomSplit(new double[] { 0.7, 0.1, 0.2});
+		JavaRDD<PojoRow>[] splits = labeledPointJavaRDD.randomSplit(new double[] { 0.7, 0.1, 0.2 });
 
 		JavaRDD<PojoRow> trainingData = splits[0];
 		JavaRDD<PojoRow> testData = splits[1]; // arxiki morfi , meta allaxtikan
@@ -183,56 +183,6 @@ public class CustomNaiveBayes {
 												// san lista
 
 		JavaRDD<PojoRow> testDataForValidation = splits[2];
-
-		Dataset<Row> labeledPointDataset = sqlSpark.createDataFrame(trainingData, PojoRow.class);
-
-		// Knn classification
-		KNNClassifier val = new KNNClassifier().setTopTreeSize(2).setK(5);
-		val.train(labeledPointDataset);
-
-		KNNClassificationModel model = val.fit(labeledPointDataset);
-		// predict on label point for Dataset
-		//val.transform(labeledPointDataset, model.topTree(), model.subTrees());
-		// Creation of Dataset of testData for KNN 
-		Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testData, PojoRow.class);
-
-		Dataset<Row> sss = model.transform(labeledPointDatasetforTest);
-		sss.show();
-		Dataset<Row> j32 = sss.select("features", "label", "prediction");
-		j32.show();
-		JavaPairRDD<Double, Double> ewo = j32.select("prediction", "label").toJavaRDD()
-				.mapToPair(new PairFunction<Row, Double, Double>() {
-
-					public Tuple2<Double, Double> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						return new Tuple2<Double, Double>(t.getDouble(0), t.getDouble(1));
-					}
-				});
-		double accuracyOfKNNOnTestData = ewo.filter(new Function<Tuple2<Double, Double>, Boolean>() {
-
-			public Boolean call(Tuple2<Double, Double> v1) throws Exception {
-				// TODO Auto-generated method stub
-				if (v1._1.doubleValue() == v1._2.doubleValue()) {
-					return true;
-				}
-				return false;
-			}
-		}).count() / (double) (testData.count());
-		System.out.println("the accuaracy of knn is " + accuracyOfKNNOnTestData);
-
-		// creating new rdd with label the prediction on test data
-		JavaRDD<PojoRow> trainDataForNaiveWithPredictionsOfKNN = j32.select("prediction", "features").toJavaRDD()
-				.map(new Function<Row, PojoRow>() {
-
-					public PojoRow call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						return new PojoRow((Double) t.get(0), (Vector) t.get(1));
-					}
-				});
-		boolean needsRetrain = doesModelNeedRetrain(trainingData, trainDataForNaiveWithPredictionsOfKNN);
-		List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN.collect();
-		//List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = testData.collect();
-		// end of knn
 
 		// have to put in type of < Integer , PojoRow > where
 		// Integer is the nth element of feature array Pojorow contains the
@@ -310,6 +260,7 @@ public class CustomNaiveBayes {
 				badTweetMapNumber);
 
 		// --------------end of sums ---------------and probabilities
+		// calculating accuracy of Naive old model in testDataForValidation
 		JavaPairRDD<Double, Double> predictionAndLabelForTestDataForValidationwithOldModel = testDataForValidation
 				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
 
@@ -320,6 +271,7 @@ public class CustomNaiveBayes {
 								probabilityCequalsGoodtweet, probabilityCequalsBadTweet), p.getLabel());
 					}
 				});
+		dom = predictionAndLabelForTestDataForValidationwithOldModel.collect();
 		double acccuracyOnTestDataForValidationWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
 				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
 
@@ -330,112 +282,185 @@ public class CustomNaiveBayes {
 					}
 				}).count() / (double) testDataForValidation.count();
 
-		// AMMEND test set to model
-		// calculating the count of combined training model
-		double newCountOfTrainingData = trainingData.count() + traindataCollectedwithLabelFromKNNFromTestData.size();
-		// testData3 is the dataset for ammending
-		// Double ammentedProbabilityCequalsGoodtweet = testData3.
+		// Creating a new rdd of predictions of Naive old model and feautres in
+		// order to calculate Entropy of it
 
-		// classification me ammending
-		double probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = probabilityCequalsGoodtweet;
-		double probabilityCequalsBadtweetAmmendedbytestDatafromKNN = probabilityCequalsBadTweet;
+		JavaRDD<PojoRow> testDataForValidationWithOldModelPredicted = testDataForValidation
+				.map(new Function<PojoRow, PojoRow>() {
 
-		// lack of parametizing global variable through nodes have to get
-		// dataset to master in order to
-		// modify the p(c) and p(x|c) accordingly
-		double m = (double) goodTweetMapNumber + 2;
-		double m2 = (double) (trainingDataCount - goodTweetMapNumber) + 2;
-
-		for (PojoRow pj : traindataCollectedwithLabelFromKNNFromTestData) {
-
-			if (pj.label == 1.0) {
-				NafiBayesModel.possibilityOfXgivenCgood.clear();
-
-				probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = (((double) newCountOfTrainingData
-						/ ((double) newCountOfTrainingData + 1)) * probabilityCequalsGoodtweetAmmendedbytestDatafromKNN)
-						+ (double) (1 / (newCountOfTrainingData + 1));
-
-				probabilityCequalsBadtweetAmmendedbytestDatafromKNN = (double) ((double) newCountOfTrainingData
-						/ ((double) newCountOfTrainingData + 1))
-						* (double) probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
-				for (int i = 0; i < pj.features.toArray().length; i++) {
-					if (pj.features.toArray()[i] == 1.00) {
-						pojoOfProbabilitiesOfGoodTweets.features
-								.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i] * (m / (m + 1))
-										+ (1 / (1 + m));
-						NafiBayesModel.possibilityOfXgivenCgood
-								.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
-					} else {
-						pojoOfProbabilitiesOfGoodTweets.features
-								.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i] * (m / (m + 1));
-						NafiBayesModel.possibilityOfXgivenCgood
-								.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
-					}
-				}
-
-			} else {
-				NafiBayesModel.possibilityOfXgivenCbad.clear();
-
-				probabilityCequalsBadtweetAmmendedbytestDatafromKNN = (double) (newCountOfTrainingData
-						/ ((double) newCountOfTrainingData + 1)) * probabilityCequalsBadtweetAmmendedbytestDatafromKNN
-						+ (double) (1 / ((double) newCountOfTrainingData + 1));
-				probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = (double) ((double) newCountOfTrainingData
-						/ ((double) newCountOfTrainingData + 1)) * probabilityCequalsGoodtweetAmmendedbytestDatafromKNN;
-				for (int i = 0; i < pj.features.toArray().length; i++) {
-					if (pj.features.toArray()[i] == 1.00) {
-						pojoOfProbabilitiesOfBadTweets.features
-								.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i] * (m2 / (m2 + 1))
-										+ (1 / (1 + m2));
-						NafiBayesModel.possibilityOfXgivenCbad
-								.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
-					} else {
-						pojoOfProbabilitiesOfBadTweets.features
-								.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i] * (m2 / (m2 + 1));
-						NafiBayesModel.possibilityOfXgivenCbad
-								.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
-
-					}
-				}
-
-				// end of ammend
-
-			}
-		}
-		final double probabilityCequalsGoodtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsGoodtweetAmmendedbytestDatafromKNN;
-		final double probabilityCequalsBadtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
-
-		JavaPairRDD<Double, Double> predictionAndLabelForTestDataforValidationwithNewModel = testDataForValidation
-				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(
-								NafiBayesModel.classify(p.getfeatures().toArray(),
-										probabilityCequalsGoodtweetAmmendedbytestDatafromKNNfinal,
-										probabilityCequalsBadtweetAmmendedbytestDatafromKNNfinal),
-								p.getLabel());
+					public PojoRow call(PojoRow v1) throws Exception {
+						// TODO Auto-generated method stub
+						return new PojoRow(NafiBayesModel.classify(v1.getfeatures().toArray(),
+								probabilityCequalsGoodtweet, probabilityCequalsBadTweet), v1.features);
 					}
 				});
-		double accuracyonTestDataForValidationwithNewModel = predictionAndLabelForTestDataforValidationwithNewModel
-				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+		if (doesModelNeedRetrain(trainingData, testDataForValidationWithOldModelPredicted)) {
 
-					private static final long serialVersionUID = 1L;
+			// ===============================================================================================================================================================
+			Dataset<Row> labeledPointDataset = sqlSpark.createDataFrame(trainingData, PojoRow.class);
+			// Knn classification
+			KNNClassifier val = new KNNClassifier().setTopTreeSize(2).setK(5);
+			val.train(labeledPointDataset);
 
-					public Boolean call(Tuple2<Double, Double> pl) {
-						return pl._1().equals(pl._2());
+			KNNClassificationModel model = val.fit(labeledPointDataset);
+			// predict on label point for Dataset
+			// val.transform(labeledPointDataset, model.topTree(),
+			// model.subTrees());
+			// Creation of Dataset of testData for KNN
+			Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testData, PojoRow.class);
+
+			Dataset<Row> sss = model.transform(labeledPointDatasetforTest);
+			sss.show();
+			Dataset<Row> j32 = sss.select("features", "label", "prediction");
+			j32.show();
+			JavaPairRDD<Double, Double> ewo = j32.select("prediction", "label").toJavaRDD()
+					.mapToPair(new PairFunction<Row, Double, Double>() {
+
+						public Tuple2<Double, Double> call(Row t) throws Exception {
+							// TODO Auto-generated method stub
+							return new Tuple2<Double, Double>(t.getDouble(0), t.getDouble(1));
+						}
+					});
+			double accuracyOfKNNOnTestData = ewo.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+
+				public Boolean call(Tuple2<Double, Double> v1) throws Exception {
+					// TODO Auto-generated method stub
+					if (v1._1.doubleValue() == v1._2.doubleValue()) {
+						return true;
 					}
-				}).count() / (double) testDataForValidation.count();
+					return false;
+				}
+			}).count() / (double) (testData.count());
+			System.out.println("the accuaracy of knn is " + accuracyOfKNNOnTestData);
 
-		System.out.println("The accuracy of Old naive model with dataForValidation is "
-				+ acccuracyOnTestDataForValidationWithOldModel);
-		System.out.println("The accuracy of new naive model with dataForValidation is "
-				+ accuracyonTestDataForValidationwithNewModel);
+			// creating new rdd with label the prediction on test data
+			JavaRDD<PojoRow> trainDataForNaiveWithPredictionsOfKNN = j32.select("prediction", "features").toJavaRDD()
+					.map(new Function<Row, PojoRow>() {
 
-		// end of ammend
+						public PojoRow call(Row t) throws Exception {
+							// TODO Auto-generated method stub
+							return new PojoRow((Double) t.get(0), (Vector) t.get(1));
+						}
+					});
+			boolean needsRetrain = doesModelNeedRetrain(trainingData, trainDataForNaiveWithPredictionsOfKNN);
+			List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN
+					.collect();
+			// List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData =
+			// testData.collect();
+			// end of knn
 
+			// AMMEND test set to model
+			// calculating the count of combined training model
+			double newCountOfTrainingData = trainingData.count()
+					+ traindataCollectedwithLabelFromKNNFromTestData.size();
+			// testData3 is the dataset for ammending
+			// Double ammentedProbabilityCequalsGoodtweet = testData3.
+
+			// classification me ammending
+			double probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = probabilityCequalsGoodtweet;
+			double probabilityCequalsBadtweetAmmendedbytestDatafromKNN = probabilityCequalsBadTweet;
+
+			// lack of parametizing global variable through nodes have to get
+			// dataset to master in order to
+			// modify the p(c) and p(x|c) accordingly
+			double m = (double) goodTweetMapNumber + 2;
+			double m2 = (double) (trainingDataCount - goodTweetMapNumber) + 2;
+
+			for (PojoRow pj : traindataCollectedwithLabelFromKNNFromTestData) {
+
+				if (pj.label == 1.0) {
+					NafiBayesModel.possibilityOfXgivenCgood.clear();
+
+					probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = (((double) newCountOfTrainingData
+							/ ((double) newCountOfTrainingData + 1))
+							* probabilityCequalsGoodtweetAmmendedbytestDatafromKNN)
+							+ (double) (1 / (newCountOfTrainingData + 1));
+
+					probabilityCequalsBadtweetAmmendedbytestDatafromKNN = (double) ((double) newCountOfTrainingData
+							/ ((double) newCountOfTrainingData + 1))
+							* (double) probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
+					for (int i = 0; i < pj.features.toArray().length; i++) {
+						if (pj.features.toArray()[i] == 1.00) {
+							pojoOfProbabilitiesOfGoodTweets.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]
+											* (m / (m + 1)) + (1 / (1 + m));
+							NafiBayesModel.possibilityOfXgivenCgood
+									.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
+						} else {
+							pojoOfProbabilitiesOfGoodTweets.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]
+											* (m / (m + 1));
+							NafiBayesModel.possibilityOfXgivenCgood
+									.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
+						}
+					}
+
+				} else {
+					NafiBayesModel.possibilityOfXgivenCbad.clear();
+
+					probabilityCequalsBadtweetAmmendedbytestDatafromKNN = (double) (newCountOfTrainingData
+							/ ((double) newCountOfTrainingData + 1))
+							* probabilityCequalsBadtweetAmmendedbytestDatafromKNN
+							+ (double) (1 / ((double) newCountOfTrainingData + 1));
+					probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = (double) ((double) newCountOfTrainingData
+							/ ((double) newCountOfTrainingData + 1))
+							* probabilityCequalsGoodtweetAmmendedbytestDatafromKNN;
+					for (int i = 0; i < pj.features.toArray().length; i++) {
+						if (pj.features.toArray()[i] == 1.00) {
+							pojoOfProbabilitiesOfBadTweets.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]
+											* (m2 / (m2 + 1)) + (1 / (1 + m2));
+							NafiBayesModel.possibilityOfXgivenCbad
+									.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
+						} else {
+							pojoOfProbabilitiesOfBadTweets.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]
+											* (m2 / (m2 + 1));
+							NafiBayesModel.possibilityOfXgivenCbad
+									.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
+
+						}
+					}
+
+					// end of ammend
+
+				}
+			}
+			final double probabilityCequalsGoodtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsGoodtweetAmmendedbytestDatafromKNN;
+			final double probabilityCequalsBadtweetAmmendedbytestDatafromKNNfinal = probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
+
+			JavaPairRDD<Double, Double> predictionAndLabelForTestDataforValidationwithNewModel = testDataForValidation
+					.mapToPair(new PairFunction<PojoRow, Double, Double>() {
+
+						private static final long serialVersionUID = 1L;
+
+						public Tuple2<Double, Double> call(PojoRow p) {
+							return new Tuple2<Double, Double>(
+									NafiBayesModel.classify(p.getfeatures().toArray(),
+											probabilityCequalsGoodtweetAmmendedbytestDatafromKNNfinal,
+											probabilityCequalsBadtweetAmmendedbytestDatafromKNNfinal),
+									p.getLabel());
+						}
+					});
+			double accuracyonTestDataForValidationwithNewModel = predictionAndLabelForTestDataforValidationwithNewModel
+					.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+
+						private static final long serialVersionUID = 1L;
+
+						public Boolean call(Tuple2<Double, Double> pl) {
+							return pl._1().equals(pl._2());
+						}
+					}).count() / (double) testDataForValidation.count();
+
+			System.out.println("The accuracy of Old naive model with dataForValidation is "
+					+ acccuracyOnTestDataForValidationWithOldModel);
+			System.out.println("The accuracy of new naive model with dataForValidation is "
+					+ accuracyonTestDataForValidationwithNewModel);
+
+			// end of ammend
+		}
 	}
-	
+
 	/**
 	 * Add to a PojoRow the posibilities of each feature / count of features
 	 * that have bad label add to NafiBayesModel those features
@@ -483,13 +508,11 @@ public class CustomNaiveBayes {
 	public static boolean doesModelNeedRetrain(JavaRDD<PojoRow> trainingData, JavaRDD<PojoRow> testData) {
 		double entropyOfTestDataSet = getEntropyOfADataSet(testData);
 		double entropyOfTrainDataset = getEntropyOfADataSet(trainingData);
+
 		
-//		if ((entropyOfTestDataSet - entropyOfTrainDataset) < 0.1
-//				|| entropyOfTestDataSet - entropyOfTrainDataset > -0.1) {
-//			return true;
-//		}
-		// based on the assumption of the training dataset is chosed to be balanced about positive and negative tweets 
-		// which means the entropy of it is close to 1 
+		// based on the assumption of the training dataset is chosed to be
+		// balanced about positive and negative tweets
+		// which means the entropy of it is close to 1
 		if ((entropyOfTrainDataset - entropyOfTestDataSet) > 0.1) {
 			return true;
 		}
@@ -522,4 +545,5 @@ public class CustomNaiveBayes {
 		return entropyOfDataset;
 
 	}
+
 }
