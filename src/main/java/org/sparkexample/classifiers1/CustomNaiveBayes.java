@@ -174,7 +174,7 @@ public class CustomNaiveBayes {
 		});
 
 		// Split the data into training and test sets (30% held out for testing)
-		JavaRDD<PojoRow>[] splits = labeledPointJavaRDD.randomSplit(new double[] { 0.5, 0.1, 0.1, 0.3 });
+		JavaRDD<PojoRow>[] splits = labeledPointJavaRDD.randomSplit(new double[] { 0.7, 0.1, 0.2});
 
 		JavaRDD<PojoRow> trainingData = splits[0];
 		JavaRDD<PojoRow> testData = splits[1]; // arxiki morfi , meta allaxtikan
@@ -183,19 +183,18 @@ public class CustomNaiveBayes {
 												// san lista
 
 		JavaRDD<PojoRow> testDataForValidation = splits[2];
-		JavaRDD<PojoRow> trainingData2 = splits[3];
 
 		Dataset<Row> labeledPointDataset = sqlSpark.createDataFrame(trainingData, PojoRow.class);
 
 		// Knn classification
-		KNNClassifier val = new KNNClassifier().setTopTreeSize(2).setK(10);
+		KNNClassifier val = new KNNClassifier().setTopTreeSize(2).setK(5);
 		val.train(labeledPointDataset);
 
 		KNNClassificationModel model = val.fit(labeledPointDataset);
-		val.transform(labeledPointDataset, model.topTree(), model.subTrees());
+		// predict on label point for Dataset
+		//val.transform(labeledPointDataset, model.topTree(), model.subTrees());
+		// Creation of Dataset of testData for KNN 
 		Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testData, PojoRow.class);
-		RDD<Tuple2<Object, Tuple2<Row, Object>[]>> temp = val.transform(labeledPointDatasetforTest, model.topTree(),
-				model.subTrees());
 
 		Dataset<Row> sss = model.transform(labeledPointDatasetforTest);
 		sss.show();
@@ -230,8 +229,9 @@ public class CustomNaiveBayes {
 						return new PojoRow((Double) t.get(0), (Vector) t.get(1));
 					}
 				});
+		boolean needsRetrain = doesModelNeedRetrain(trainingData, trainDataForNaiveWithPredictionsOfKNN);
 		List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN.collect();
-
+		//List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = testData.collect();
 		// end of knn
 
 		// have to put in type of < Integer , PojoRow > where
@@ -435,7 +435,7 @@ public class CustomNaiveBayes {
 		// end of ammend
 
 	}
-
+	
 	/**
 	 * Add to a PojoRow the posibilities of each feature / count of features
 	 * that have bad label add to NafiBayesModel those features
@@ -481,8 +481,16 @@ public class CustomNaiveBayes {
 	}
 
 	public static boolean doesModelNeedRetrain(JavaRDD<PojoRow> trainingData, JavaRDD<PojoRow> testData) {
-		if ((getEntropyOfADataSet(testData) - getEntropyOfADataSet(trainingData)) < 0.1
-				|| (getEntropyOfADataSet(testData) - getEntropyOfADataSet(trainingData)) > -0.1) {
+		double entropyOfTestDataSet = getEntropyOfADataSet(testData);
+		double entropyOfTrainDataset = getEntropyOfADataSet(trainingData);
+		
+//		if ((entropyOfTestDataSet - entropyOfTrainDataset) < 0.1
+//				|| entropyOfTestDataSet - entropyOfTrainDataset > -0.1) {
+//			return true;
+//		}
+		// based on the assumption of the training dataset is chosed to be balanced about positive and negative tweets 
+		// which means the entropy of it is close to 1 
+		if ((entropyOfTrainDataset - entropyOfTestDataSet) > 0.1) {
 			return true;
 		}
 		return false;
