@@ -1,5 +1,7 @@
 package org.sparkexample.classifiers1;
 
+import java.io.Serializable;
+
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -10,7 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.sparkexample.pojo1.DataFeature;
 import org.sparkexample.pojo1.PojoRow;
 
-public class DataExtraction {
+public class DataExtraction implements Serializable{
 	/**
 	 * 
 	 */

@@ -13,13 +13,9 @@ import org.apache.spark.ml.classification.KNNClassificationModel;
 import org.apache.spark.ml.classification.KNNClassifier;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.linalg.Vectors;
-import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.sparkexample.pojo1.DataFeature;
 import org.sparkexample.pojo1.PojoRow;
 
 import scala.Tuple2;
@@ -36,7 +32,6 @@ public class CustomNaiveBayes {
 		SparkSession sqlSpark = new SparkSession(sc1);
 
 		// Load and parse the data file.
-		String datapath = "data/60000tweets.csv";
 		
 		DataExtraction data = new DataExtraction(sc1);
 
