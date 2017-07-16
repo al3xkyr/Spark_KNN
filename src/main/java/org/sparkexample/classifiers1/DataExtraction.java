@@ -12,7 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.sparkexample.pojo1.DataFeature;
 import org.sparkexample.pojo1.PojoRow;
 
-public class DataExtraction implements Serializable{
+public class DataExtraction implements Serializable {
 	/**
 	 * 
 	 */
@@ -22,21 +22,16 @@ public class DataExtraction implements Serializable{
 
 	private String datapath;
 
-	public DataExtraction(SparkContext sc1){
+	public DataExtraction(SparkContext sc1) {
 		this.sc1 = sc1;
 
-		
-		
-
 		this.datapath = "data/60000tweets.csv";
-		
-	}
 
+	}
 
 	public JavaRDD<DataFeature> getDataCleaned() {
 		JavaRDD<String> dataAsStrings = this.sc1.textFile(this.datapath, 5).toJavaRDD();
 		JavaRDD<DataFeature> cleaned = dataAsStrings.map(new Function<String, DataFeature>() {
-			
 
 			/**
 			 * 
@@ -76,7 +71,6 @@ public class DataExtraction implements Serializable{
 		return cleaned;
 	}
 
-
 	// transformation on dataset to be cleaned and create the datafeature
 	// which has swn score and the attributes that i want to store
 	// pernei to rdd apo panw kai to kanei apo RDD string se RDD apo
@@ -84,7 +78,6 @@ public class DataExtraction implements Serializable{
 	public JavaRDD<PojoRow> getDatalabeledPoint() {
 
 		JavaRDD<PojoRow> labeledPointJavaRDD = getDataCleaned().map(new Function<DataFeature, PojoRow>() {
-			
 
 			/**
 			 * 
