@@ -46,81 +46,9 @@ public class CustomNaiveBayes {
 
 		JavaRDD<PojoRow> testDataForValidation = splits[2];
 
-		// have to put in type of < Integer , PojoRow > where
-		// Integer is the nth element of feature array Pojorow contains the
-		// array
-
-		// In order to calculate model of naive bayes
-		// we want to calculate
-		// P(C|X) = P(X|C)*P(C) / P(X) for each new tweet for each class ( good
-		// , bad )
-		// On given tweet that has the biggest posterior probability on a class
-		// assigned there
-		// Naive model
-
-		double trainingDataCount = trainingData.count();
-		JavaRDD<PojoRow> goodTweetMap = trainingData.filter(new Function<PojoRow, Boolean>() {
-
-			private static final long serialVersionUID = 1L;
-
-			public Boolean call(PojoRow v1) throws Exception {
-				if (v1.getLabel() == 1.0) {
-					return true;
-				}
-				return false;
-			}
-		}).cache();
-		JavaRDD<PojoRow> badTweetMap = trainingData.filter(new Function<PojoRow, Boolean>() {
-
-			private static final long serialVersionUID = 1L;
-
-			public Boolean call(PojoRow v1) throws Exception {
-				if (v1.getLabel() == 0.0) {
-					return true;
-				}
-				return false;
-			}
-		}).cache();
-
-		// p(c=1) pithanotita twn kalwn tweets sto set
-		long goodTweetMapNumber = goodTweetMap.count();
-		long badTweetMapNumber = badTweetMap.count();
-		final Double probabilityCequalsGoodtweet = goodTweetMap.count() / trainingDataCount;
-		final Double probabilityCequalsBadTweet = 1 - probabilityCequalsGoodtweet;
-
-		// In order to decouple algorithm from the specific features
-		// i have to hold it on an array of
-		PojoRow pojoOfSumOfGoodTweets = goodTweetMap.reduce(new Function2<PojoRow, PojoRow, PojoRow>() {
-
-			public PojoRow call(PojoRow v1, PojoRow v2) throws Exception {
-				// TODO Auto-generated method stub
-				double[] v1Array = v1.features.toArray();
-				double[] v2Array = v2.features.toArray();
-				double[] vSumArray = new double[v1.features.size()];
-				for (int i = 0; i < v1Array.length; i++) {
-					vSumArray[i] = v1Array[i] + v2Array[i];
-				}
-				return new PojoRow(v1.label, Vectors.dense(vSumArray));
-			}
-		});
-		PojoRow pojoOfSumOfBadTweets = badTweetMap.reduce(new Function2<PojoRow, PojoRow, PojoRow>() {
-
-			public PojoRow call(PojoRow v1, PojoRow v2) throws Exception {
-				// TODO Auto-generated method stub
-				double[] v1Array = v1.features.toArray();
-				double[] v2Array = v2.features.toArray();
-				double[] vSumArray = new double[v1.features.size()];
-				for (int i = 0; i < v1Array.length; i++) {
-					vSumArray[i] = v1Array[i] + v2Array[i];
-				}
-				return new PojoRow(v1.label, Vectors.dense(vSumArray));
-			}
-		});
-		PojoRow pojoOfProbabilitiesOfGoodTweets = addPosibilitiesBasedOnSumsforGoodTweets(pojoOfSumOfGoodTweets,
-				goodTweetMapNumber);
-		PojoRow pojoOfProbabilitiesOfBadTweets = addPosibilitiesBasedOnSumsforBadTweets(pojoOfSumOfBadTweets,
-				badTweetMapNumber);
-
+		
+		final InitialParameters baseModel = new InitialParameters(trainingData);
+		
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
 		JavaPairRDD<Double, Double> predictionAndLabelForTestDataForValidationwithOldModel = testData
@@ -129,8 +57,11 @@ public class CustomNaiveBayes {
 					private static final long serialVersionUID = 1L;
 
 					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(NafiBayesModel.classify(p.getfeatures().toArray(),
-								probabilityCequalsGoodtweet, probabilityCequalsBadTweet), p.getLabel());
+						return new Tuple2<Double, Double>(NafiBayesModel.classify(
+								NafiBayesModel.calculatePxgivenC(baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfX흎0givenCbad, p.features.toArray()),
+								NafiBayesModel.calculatePxgivenC(baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfX흎0givenCbad, p.features.toArray()),
+								baseModel.posCgood,
+								baseModel.posCbad),p.label);
 					}
 				});
 		double acccuracyOnTestDataWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
@@ -142,11 +73,11 @@ public class CustomNaiveBayes {
 						return pl._1().equals(pl._2());
 					}
 				}).count() / (double) testData.count();
-
+		
 		// Creating a new rdd of predictions of Naive old model and feautres in
 		// order to calculate Entropy of it
 
-		JavaRDD<PojoRow> testDataForValidationWithOldModelPredicted = testData
+	/*	JavaRDD<PojoRow> testDataForValidationWithOldModelPredicted = testData
 				.map(new Function<PojoRow, PojoRow>() {
 
 					public PojoRow call(PojoRow v1) throws Exception {
@@ -229,7 +160,7 @@ public class CustomNaiveBayes {
 			for (PojoRow pj : traindataCollectedwithLabelFromKNNFromTestData) {
 
 				if (pj.label == 1.0) {
-					NafiBayesModel.possibilityOfXgivenCgood.clear();
+					NafiBayesModel.possibilityOfXEq1givenCgood.clear();
 
 					probabilityCequalsGoodtweetAmmendedbytestDatafromKNN = (((double) newCountOfTrainingData
 							/ ((double) newCountOfTrainingData + 1))
@@ -241,22 +172,22 @@ public class CustomNaiveBayes {
 							* (double) probabilityCequalsBadtweetAmmendedbytestDatafromKNN;
 					for (int i = 0; i < pj.features.toArray().length; i++) {
 						if (pj.features.toArray()[i] == 1.00) {
-							pojoOfProbabilitiesOfGoodTweets.features
-									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]
+							pojoOfProbabilitiesOfGoodTweetsForAeq1.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweetsForAeq1.features.toArray()[i]
 											* (m / (m + 1)) + (1 / (1 + m));
-							NafiBayesModel.possibilityOfXgivenCgood
-									.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
+							NafiBayesModel.possibilityOfXEq1givenCgood
+									.add((double) pojoOfProbabilitiesOfGoodTweetsForAeq1.features.toArray()[i]);
 						} else {
-							pojoOfProbabilitiesOfGoodTweets.features
-									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]
+							pojoOfProbabilitiesOfGoodTweetsForAeq1.features
+									.toArray()[i] = (double) pojoOfProbabilitiesOfGoodTweetsForAeq1.features.toArray()[i]
 											* (m / (m + 1));
-							NafiBayesModel.possibilityOfXgivenCgood
-									.add((double) pojoOfProbabilitiesOfGoodTweets.features.toArray()[i]);
+							NafiBayesModel.possibilityOfXEq1givenCgood
+									.add((double) pojoOfProbabilitiesOfGoodTweetsForAeq1.features.toArray()[i]);
 						}
 					}
 
 				} else {
-					NafiBayesModel.possibilityOfXgivenCbad.clear();
+					NafiBayesModel.possibilityOfX흎1givenCbad.clear();
 
 					probabilityCequalsBadtweetAmmendedbytestDatafromKNN = (double) (newCountOfTrainingData
 							/ ((double) newCountOfTrainingData + 1))
@@ -270,13 +201,13 @@ public class CustomNaiveBayes {
 							pojoOfProbabilitiesOfBadTweets.features
 									.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]
 											* (m2 / (m2 + 1)) + (1 / (1 + m2));
-							NafiBayesModel.possibilityOfXgivenCbad
+							NafiBayesModel.possibilityOfX흎1givenCbad
 									.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
 						} else {
 							pojoOfProbabilitiesOfBadTweets.features
 									.toArray()[i] = (double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]
 											* (m2 / (m2 + 1));
-							NafiBayesModel.possibilityOfXgivenCbad
+							NafiBayesModel.possibilityOfX흎1givenCbad
 									.add((double) pojoOfProbabilitiesOfBadTweets.features.toArray()[i]);
 
 						}
@@ -312,58 +243,18 @@ public class CustomNaiveBayes {
 						}
 					}).count() / (double) testData.count();
 
-			System.out.println("The accuracy of Old naive model with dataForValidation is "
+		*/	System.out.println("The accuracy of Old naive model with dataForValidation is "
 					+ acccuracyOnTestDataWithOldModel);
-			System.out.println("The accuracy of new naive model with dataForValidation is "
-					+ accuracyonTestDataForValidationwithNewModel);
+			
 
 			// end of ammend
 		}
-	}
+	
 
-	/**
-	 * Add to a PojoRow the posibilities of each feature / count of features
-	 * that have bad label add to NafiBayesModel those features
-	 * 
-	 * @param pojoOfSumOfBadTweets
-	 * @param badTweetMapNumber
-	 * @return
-	 */
+	
 
-	private static PojoRow addPosibilitiesBasedOnSumsforBadTweets(PojoRow pojoOfSumOfBadTweets,
-			long badTweetMapNumber) {
-		// TODO Auto-generated method stub
-		double[] arrayOfFeatures = pojoOfSumOfBadTweets.features.toArray();
-		double[] arrayOfProbabilitites = new double[arrayOfFeatures.length];
-		NafiBayesModel.possibilityOfXgivenCbad.clear();
-		for (int i = 0; i < arrayOfFeatures.length; i++) {
-			arrayOfProbabilitites[i] = arrayOfFeatures[i] / badTweetMapNumber;
-			NafiBayesModel.possibilityOfXgivenCbad.add(arrayOfFeatures[i] / badTweetMapNumber);
-		}
-		return new PojoRow(pojoOfSumOfBadTweets.label, Vectors.dense(arrayOfProbabilitites));
-	}
+	
 
-	/**
-	 * Add to a PojoRow the posibilities of each feature / count of features
-	 * that have good label add to NafiBayesModel those features
-	 * 
-	 * @param pojoOfSumOfGoodTweets
-	 * @param goodTweetMapNumber
-	 * @return
-	 */
-	private static PojoRow addPosibilitiesBasedOnSumsforGoodTweets(PojoRow pojoOfSumOfGoodTweets,
-			long goodTweetMapNumber) {
-		// TODO Auto-generated method stub
-		double[] arrayOfFeatures = pojoOfSumOfGoodTweets.features.toArray();
-		double[] arrayOfProbabilitites = new double[arrayOfFeatures.length];
-		NafiBayesModel.possibilityOfXgivenCgood.clear();
-		for (int i = 0; i < arrayOfFeatures.length; i++) {
-			arrayOfProbabilitites[i] = arrayOfFeatures[i] / goodTweetMapNumber;
-			NafiBayesModel.possibilityOfXgivenCgood.add(arrayOfFeatures[i] / goodTweetMapNumber);
-		}
-
-		return new PojoRow(pojoOfSumOfGoodTweets.label, Vectors.dense(arrayOfProbabilitites));
-	}
 
 	public static boolean doesModelNeedRetrain(JavaRDD<PojoRow> trainingData, JavaRDD<PojoRow> testData) {
 		double entropyOfTestDataSet = getEntropyOfADataSet(testData);
