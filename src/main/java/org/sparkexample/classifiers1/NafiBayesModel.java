@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class NafiBayesModel {
 
-	public static Double calculatePxgivenC (double[] possibilityOfXEq1,
+	public static double calculatePxgivenC (double[] possibilityOfXEq1,
 			double[] possibilityOfXEq0 ,	double[] featureForClassification)
 	{
 		double pXgivenC = 1.0 ; 
@@ -20,7 +20,7 @@ public class NafiBayesModel {
 		
 	}
 	
-	public static Double classify(double pXgivenCgood ,double pXgivenCbad, double possibilityOfCgood, double possibilityOfCbad ) {
+	public static double classify(double pXgivenCgood ,double pXgivenCbad, double possibilityOfCgood, double possibilityOfCbad ) {
 
 		if ((pXgivenCgood * possibilityOfCgood) > (pXgivenCbad * possibilityOfCbad)) {
 			return (double) 1;

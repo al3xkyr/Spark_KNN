@@ -16,10 +16,6 @@ public class InitialParameters implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	
-	public InitialParameters (JavaRDD<PojoRow> trainingData){
-		constructPC(trainingData);
-	}
-
 	public  double[] possibilityOfXEq1givenCgood ;
 	public  double[] possibilityOfXÅq1givenCbad ;
 	public  double[] possibilityOfXEq0givenCgood ;
@@ -28,6 +24,10 @@ public class InitialParameters implements Serializable {
 	
 	public double posCgood;
 	public double posCbad;
+	public InitialParameters (JavaRDD<PojoRow> trainingData){
+		constructPC(trainingData);
+	}
+
 	
 	
 	
