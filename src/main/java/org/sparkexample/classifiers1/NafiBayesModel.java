@@ -1,8 +1,5 @@
 package org.sparkexample.classifiers1;
 
-import java.util.ArrayList;
-import java.util.Vector;
-
 public class NafiBayesModel {
 
 	public static double calculatePxgivenC (double[] possibilityOfXEq1,
