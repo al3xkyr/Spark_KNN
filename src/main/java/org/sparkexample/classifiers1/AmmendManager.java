@@ -1,28 +1,29 @@
 package org.sparkexample.classifiers1;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.sparkexample.pojo1.PojoRow;
 
-public class AmmendManager {
+public class AmmendManager implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private double[] possibilityOfXEq1givenCgood;
-	private double[] possibilityOfX흎1givenCbad;
-	private double[] possibilityOfXEq0givenCgood;
-	private double[] possibilityOfX흎0givenCbad;
+	double[] possibilityOfXEq1givenCgood;
+	double[] possibilityOfX흎1givenCbad;
+	double[] possibilityOfXEq0givenCgood;
+	double[] possibilityOfX흎0givenCbad;
 
-	private double posCgood;
-	private double posCbad;
+	double posCgood;
+	double posCbad;
 	private double numberOfCgood;
 	private double numberOfCbad;
 
 	public AmmendManager(double[] possibilityOfXEq1givenCgood, double[] possibilityOfX흎1givenCbad,
 			double[] possibilityOfXEq0givenCgood, double[] possibilityOfX흎0givenCbad, double posCgood, double posCbad,
-			double numberOfCgood, double numberOfCbad) {
+			double numberOfCgood, double numberOfCbad,List<PojoRow> dataforAmmending, long trainingDatacount) {
 		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
 		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
 		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
@@ -31,10 +32,13 @@ public class AmmendManager {
 		this.posCgood = posCgood;
 		this.numberOfCgood = numberOfCgood;
 		this.numberOfCbad = numberOfCbad;
+		ammend(dataforAmmending, trainingDatacount);
 	}
 
-	public void ammend(List<PojoRow> listOfAmmendingTweets, double countOfTrainingData) {
-		double s = countOfTrainingData + listOfAmmendingTweets.size();
+	public void ammend(List<PojoRow> listOfAmmendingTweets, long countOfTrainingData) {
+		Long long1 = new Long(countOfTrainingData);
+		double countOfTrainingDataDouble = long1.doubleValue();
+		double s = countOfTrainingDataDouble + listOfAmmendingTweets.size();
 		for (PojoRow tweet : listOfAmmendingTweets) {
 			if (tweet.label == 1.0) {
 				this.numberOfCgood = this.numberOfCgood + 1;

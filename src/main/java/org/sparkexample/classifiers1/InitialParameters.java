@@ -24,6 +24,8 @@ public class InitialParameters implements Serializable {
 	
 	public double posCgood;
 	public double posCbad;
+	public double goodTweetNumber;
+	public double badTweetNumber;
 	public InitialParameters (JavaRDD<PojoRow> trainingData){
 		constructPC(trainingData);
 	}
@@ -56,6 +58,8 @@ public class InitialParameters implements Serializable {
 			}
 		}).cache();
 
+		goodTweetNumber = goodTweetMap.count();
+		badTweetNumber = badTweetMap.count();
 		// p(c=1) pithanotita twn kalwn tweets sto set
 		long goodTweetMapNumber = goodTweetMap.count();
 		long badTweetMapNumber = badTweetMap.count();

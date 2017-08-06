@@ -15,7 +15,7 @@ public class NafiBayesModel {
 		}
 		return pXgivenC;
 		
-	}
+	} 
 	
 	public static double classify(
 			double[] possibilityOfXEq1givenCgood, 
