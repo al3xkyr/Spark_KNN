@@ -166,7 +166,8 @@ public class DataExtraction implements Serializable {
 				// double[] arrayofVector = { swn_positive, swn_negative,
 				// swn_somewhatPositive, swn_neutural,
 				// swn_somewhatNegative, neg, ohso, capital, isMetaphor, love };
-				double[] arrayofVector = {  neg, ohso, capital, isMetaphor, love };
+				double[] arrayofVector = {  neg, ohso, capital, isMetaphor, love, swn_positive, swn_negative,  swn_somewhatPositive,
+						swn_neutural, swn_somewhatNegative};
 				Vector dv = Vectors.dense(arrayofVector);
 				PojoRow rowPojoforProcess = new PojoRow(dataFeature.getLable(), dv);
 				return rowPojoforProcess;

@@ -9,7 +9,7 @@ public class NafiBayesModel {
 		for ( int i = 0 ; i < featureForClassification.length ; i++ ){
 			if ((featureForClassification[i] == 1.0)){
 				pXgivenC *= possibilityOfXEq1[i];
-			}else {
+			}else { 
 				pXgivenC *= possibilityOfXEq0[i];
 			}
 		}

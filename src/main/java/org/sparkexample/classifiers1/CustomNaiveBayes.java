@@ -27,13 +27,10 @@ public class CustomNaiveBayes {
 		DataExtraction data = new DataExtraction(sc1);
 
 		// Split the data into training and test sets (30% held out for testing)
-		JavaRDD<PojoRow>[] splits = data.getDatalabeledPoint().randomSplit(new double[] { 0.4, 0.1, 0.3, 0.1, 0.1 });
+		JavaRDD<PojoRow>[] splits = data.getDatalabeledPoint().randomSplit(new double[] { 0.5, 0.1, 0.2, 0.2,});
 
 		JavaRDD<PojoRow> trainingData = splits[0];
-		JavaRDD<PojoRow> initTestData = splits[1]; // arxiki morfi , meta allaxtikan
-												// apo ton knn me
-												// traindataCollectedwithLabelFromKNNFromTestData
-												// san lista
+		JavaRDD<PojoRow> initTestData = splits[1]; 
 
 		JavaRDD<PojoRow> ammendedDataForOptimalAccuracy = splits[2];
 		JavaRDD<PojoRow> ammendedDataForKNNAccuracy = splits[3];
@@ -42,6 +39,7 @@ public class CustomNaiveBayes {
 
 		
 		final InitialParameters baseModel = new InitialParameters(trainingData);
+		final KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
 		final AmmendManager ammendWithRightdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
 				, baseModel.possibilityOfX흎1givenCbad, 
 				baseModel.possibilityOfXEq0givenCgood, 
@@ -49,6 +47,15 @@ public class CustomNaiveBayes {
 				baseModel.posCgood, 
 				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
 				ammendedDataForOptimalAccuracy.collect(), 
+				trainingData.count());
+		
+		final AmmendManager ammendWithKNNdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
+				, baseModel.possibilityOfX흎1givenCbad, 
+				baseModel.possibilityOfXEq0givenCgood, 
+				baseModel.possibilityOfX흎0givenCbad, 
+				baseModel.posCgood, 
+				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
+				knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy), 
 				trainingData.count());
 		
 		
@@ -78,7 +85,7 @@ public class CustomNaiveBayes {
 					}
 				}).count() / (double) initTestData.count();
 		
-		///========================================================================================
+		///==================================Ideal scenario of ammending good data======================================================
 		
 		JavaPairRDD<Double, Double> mapAfterAmmendWithGoodData = initTestData
 				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
@@ -102,8 +109,29 @@ public class CustomNaiveBayes {
 						return pl._1().equals(pl._2());
 					}
 				}).count() / (double) initTestData.count();
-		
-		
+		/// ==================================================Scenario of KNN data =================================================
+		JavaPairRDD<Double, Double> mapAfterAmmendWithKNNData = initTestData
+				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
+
+					private static final long serialVersionUID = 1L;
+
+					public Tuple2<Double, Double> call(PojoRow p) {
+						return new Tuple2<Double, Double>(NafiBayesModel.classify(
+								ammendWithKNNdata.possibilityOfXEq1givenCgood, ammendWithKNNdata.possibilityOfXEq0givenCgood,
+								ammendWithKNNdata.possibilityOfX흎1givenCbad, ammendWithKNNdata.possibilityOfX흎0givenCbad,
+								ammendWithKNNdata.posCgood,
+								ammendWithKNNdata.posCbad, p.features.toArray()),p.label);
+					}
+				});
+		double acccuracyOnTestDataWithAmmendedWithKNNData = mapAfterAmmendWithKNNData
+				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+
+					private static final long serialVersionUID = 1L;
+
+					public Boolean call(Tuple2<Double, Double> pl) {
+						return pl._1().equals(pl._2());
+					}
+				}).count() / (double) initTestData.count();
 		
 		
 		System.out.println("The accuracy of Old naive model with dataForValidation is "
@@ -111,6 +139,8 @@ public class CustomNaiveBayes {
 		
 		System.out.println("The optimal accuracy after the ammend of ammendedDataForOptimalAccuracy " + acccuracyOnTestDataWithAmmendedWithGoodData);
 			
+		
+		System.out.println( "The accuracy after the ammend from KNN classifier " + acccuracyOnTestDataWithAmmendedWithKNNData);
 
 		}
 	
