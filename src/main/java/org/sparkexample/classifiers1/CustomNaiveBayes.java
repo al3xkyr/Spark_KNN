@@ -58,10 +58,10 @@ public class CustomNaiveBayes {
 
 					public Tuple2<Double, Double> call(PojoRow p) {
 						return new Tuple2<Double, Double>(NafiBayesModel.classify(
-								NafiBayesModel.calculatePxgivenC(baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfX흎0givenCbad, p.features.toArray()),
-								NafiBayesModel.calculatePxgivenC(baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfX흎0givenCbad, p.features.toArray()),
+								baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
+								baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
 								baseModel.posCgood,
-								baseModel.posCbad),p.label);
+								baseModel.posCbad, p.features.toArray()),p.label);
 					}
 				});
 		double acccuracyOnTestDataWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel

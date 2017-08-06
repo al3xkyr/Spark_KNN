@@ -17,8 +17,16 @@ public class NafiBayesModel {
 		
 	}
 	
-	public static double classify(double pXgivenCgood ,double pXgivenCbad, double possibilityOfCgood, double possibilityOfCbad ) {
-
+	public static double classify(
+			double[] possibilityOfXEq1givenCgood, 
+			double[] possibilityOfXEq0givenCgood,
+			double[] possibilityOfX흎1givenCbad,
+			double[] possibilityOfX흎0givenCbad,
+			double possibilityOfCgood, 
+			double possibilityOfCbad,
+			double[] featureForClassification) {
+		double pXgivenCgood = calculatePxgivenC(possibilityOfXEq1givenCgood, possibilityOfXEq0givenCgood, featureForClassification);
+		double pXgivenCbad = calculatePxgivenC(possibilityOfX흎1givenCbad, possibilityOfX흎0givenCbad, featureForClassification);
 		if ((pXgivenCgood * possibilityOfCgood) > (pXgivenCbad * possibilityOfCbad)) {
 			return (double) 1;
 		}
