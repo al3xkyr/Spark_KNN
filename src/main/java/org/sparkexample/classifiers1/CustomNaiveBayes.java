@@ -1,5 +1,8 @@
 package org.sparkexample.classifiers1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -58,7 +61,14 @@ public class CustomNaiveBayes {
 				knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy), 
 				trainingData.count());
 		
-		
+		final AmmendManager ammendWithCrossValidatedData = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
+				, baseModel.possibilityOfX흎1givenCbad, 
+				baseModel.possibilityOfXEq0givenCgood, 
+				baseModel.possibilityOfX흎0givenCbad, 
+				baseModel.posCgood, 
+				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
+				getCrossValidatedTweets(knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy), baseModel),
+				trainingData.count());
 		
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
@@ -133,6 +143,31 @@ public class CustomNaiveBayes {
 					}
 				}).count() / (double) initTestData.count();
 		
+		// ======================scenario of the crossvalidated data ======================================================
+		JavaPairRDD<Double, Double> mapAfterAmmendWithCrossValidatedData = initTestData
+				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
+
+					private static final long serialVersionUID = 1L;
+
+					public Tuple2<Double, Double> call(PojoRow p) {
+						return new Tuple2<Double, Double>(NafiBayesModel.classify(
+								ammendWithCrossValidatedData.possibilityOfXEq1givenCgood, ammendWithCrossValidatedData.possibilityOfXEq0givenCgood,
+								ammendWithCrossValidatedData.possibilityOfX흎1givenCbad, ammendWithCrossValidatedData.possibilityOfX흎0givenCbad,
+								ammendWithCrossValidatedData.posCgood,
+								ammendWithCrossValidatedData.posCbad, p.features.toArray()),p.label);
+					}
+				});
+		double acccuracyOnTestDataWithAmmendedWithCrossValidatedData = mapAfterAmmendWithCrossValidatedData
+				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
+
+					private static final long serialVersionUID = 1L;
+
+					public Boolean call(Tuple2<Double, Double> pl) {
+						return pl._1().equals(pl._2());
+					}
+				}).count() / (double) initTestData.count();
+		
+		
 		
 		System.out.println("The accuracy of Old naive model with dataForValidation is "
 				+ acccuracyOnTestDataWithOldModel);
@@ -141,10 +176,27 @@ public class CustomNaiveBayes {
 			
 		
 		System.out.println( "The accuracy after the ammend from KNN classifier " + acccuracyOnTestDataWithAmmendedWithKNNData);
+		
+		System.out.println("The accuracy after the data validated is " + acccuracyOnTestDataWithAmmendedWithCrossValidatedData);
 
 		}
 	
-
+ public static List<PojoRow> getCrossValidatedTweets(List<PojoRow> list, InitialParameters baseModel){
+	 List<PojoRow> validatedList = new ArrayList<PojoRow>();
+	 for (PojoRow pojo : list){
+		 
+		if( NafiBayesModel.classify(
+				 baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
+				 baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
+				 baseModel.posCgood,
+				 baseModel.posCbad, pojo.features.toArray())== pojo.label){
+		validatedList.add(pojo);	
+		}
+		
+	 }
+	 return validatedList;
+	 
+ }
 
 	
 
