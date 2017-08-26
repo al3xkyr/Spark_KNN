@@ -79,7 +79,7 @@ public class AmmendManager implements Serializable {
 					double newTmp1 = ((m / (m + 1)) * tmp1) + (1 / (m + 1));
 					this.possibilityOfX흎1givenCbad[i] = newTmp1;
 					// for good tweets with 0
-					double tmp0 = this.possibilityOfX흎0givenCbad[i];
+					double tmp0 = this.possibilityOfX흎0givenCbad[i]; 
 					double newTmp0 = ((m / (m + 1)) * tmp0);
 					this.possibilityOfX흎0givenCbad[i] = newTmp0;
 				}

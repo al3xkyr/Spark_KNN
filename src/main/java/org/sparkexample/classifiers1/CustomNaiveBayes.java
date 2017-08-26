@@ -41,145 +41,99 @@ public class CustomNaiveBayes {
 
 
 		
-		final InitialParameters baseModel = new InitialParameters(trainingData);
-		final KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
-		final AmmendManager ammendWithRightdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
+		 InitialParameters baseModel = new InitialParameters(trainingData);
+		 KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
+		 List<PojoRow> rightDataforAmmending = ammendedDataForOptimalAccuracy.collect();
+		 AmmendManager ammendWithRightdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
 				, baseModel.possibilityOfX흎1givenCbad, 
 				baseModel.possibilityOfXEq0givenCgood, 
 				baseModel.possibilityOfX흎0givenCbad, 
 				baseModel.posCgood, 
 				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
-				ammendedDataForOptimalAccuracy.collect(), 
+				rightDataforAmmending, 
 				trainingData.count());
 		
-		final AmmendManager ammendWithKNNdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
+		 List<PojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);
+		 AmmendManager ammendWithKNNdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
 				, baseModel.possibilityOfX흎1givenCbad, 
 				baseModel.possibilityOfXEq0givenCgood, 
 				baseModel.possibilityOfX흎0givenCbad, 
 				baseModel.posCgood, 
 				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
-				knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy), 
+				knnDataForAmmending, 
 				trainingData.count());
-		
-		final AmmendManager ammendWithCrossValidatedData = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
+		 
+		 List<PojoRow> crossValidatedData = getCrossValidatedTweets(knnDataForAmmending, baseModel);
+		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
 				, baseModel.possibilityOfX흎1givenCbad, 
 				baseModel.possibilityOfXEq0givenCgood, 
 				baseModel.possibilityOfX흎0givenCbad, 
 				baseModel.posCgood, 
 				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
-				getCrossValidatedTweets(knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy), baseModel),
+				crossValidatedData,
 				trainingData.count());
 		
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
-		JavaPairRDD<Double, Double> predictionAndLabelForTestDataForValidationwithOldModel = initTestData
-				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(NafiBayesModel.classify(
-								baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
-								baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
-								baseModel.posCgood,
-								baseModel.posCbad, p.features.toArray()),p.label);
-					}
-				});
-		double acccuracyOnTestDataWithOldModel = predictionAndLabelForTestDataForValidationwithOldModel
-				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Boolean call(Tuple2<Double, Double> pl) {
-						return pl._1().equals(pl._2());
-					}
-				}).count() / (double) initTestData.count();
-		
+		List<PojoRow> initTestDataCollected = initTestData.collect();
+		double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
+		double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
+		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
+		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
 		///==================================Ideal scenario of ammending good data======================================================
 		
-		JavaPairRDD<Double, Double> mapAfterAmmendWithGoodData = initTestData
-				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(NafiBayesModel.classify(
-								ammendWithRightdata.possibilityOfXEq1givenCgood, ammendWithRightdata.possibilityOfXEq0givenCgood,
-								ammendWithRightdata.possibilityOfX흎1givenCbad, ammendWithRightdata.possibilityOfX흎0givenCbad,
-								ammendWithRightdata.posCgood,
-								ammendWithRightdata.posCbad, p.features.toArray()),p.label);
-					}
-				});
-		double acccuracyOnTestDataWithAmmendedWithGoodData = mapAfterAmmendWithGoodData
-				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Boolean call(Tuple2<Double, Double> pl) {
-						return pl._1().equals(pl._2());
-					}
-				}).count() / (double) initTestData.count();
+		
 		/// ==================================================Scenario of KNN data =================================================
-		JavaPairRDD<Double, Double> mapAfterAmmendWithKNNData = initTestData
-				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(NafiBayesModel.classify(
-								ammendWithKNNdata.possibilityOfXEq1givenCgood, ammendWithKNNdata.possibilityOfXEq0givenCgood,
-								ammendWithKNNdata.possibilityOfX흎1givenCbad, ammendWithKNNdata.possibilityOfX흎0givenCbad,
-								ammendWithKNNdata.posCgood,
-								ammendWithKNNdata.posCbad, p.features.toArray()),p.label);
-					}
-				});
-		double acccuracyOnTestDataWithAmmendedWithKNNData = mapAfterAmmendWithKNNData
-				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Boolean call(Tuple2<Double, Double> pl) {
-						return pl._1().equals(pl._2());
-					}
-				}).count() / (double) initTestData.count();
-		
-		// ======================scenario of the crossvalidated data ======================================================
-		JavaPairRDD<Double, Double> mapAfterAmmendWithCrossValidatedData = initTestData
-				.mapToPair(new PairFunction<PojoRow, Double, Double>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Tuple2<Double, Double> call(PojoRow p) {
-						return new Tuple2<Double, Double>(NafiBayesModel.classify(
-								ammendWithCrossValidatedData.possibilityOfXEq1givenCgood, ammendWithCrossValidatedData.possibilityOfXEq0givenCgood,
-								ammendWithCrossValidatedData.possibilityOfX흎1givenCbad, ammendWithCrossValidatedData.possibilityOfX흎0givenCbad,
-								ammendWithCrossValidatedData.posCgood,
-								ammendWithCrossValidatedData.posCbad, p.features.toArray()),p.label);
-					}
-				});
-		double acccuracyOnTestDataWithAmmendedWithCrossValidatedData = mapAfterAmmendWithCrossValidatedData
-				.filter(new Function<Tuple2<Double, Double>, Boolean>() {
-
-					private static final long serialVersionUID = 1L;
-
-					public Boolean call(Tuple2<Double, Double> pl) {
-						return pl._1().equals(pl._2());
-					}
-				}).count() / (double) initTestData.count();
-		
-		
 		
 		System.out.println("The accuracy of Old naive model with dataForValidation is "
-				+ acccuracyOnTestDataWithOldModel);
+				+ accuracyOfInitModel);
 		
-		System.out.println("The optimal accuracy after the ammend of ammendedDataForOptimalAccuracy " + acccuracyOnTestDataWithAmmendedWithGoodData);
+		System.out.println("The optimal accuracy after the ammend of ammendedDataForOptimalAccuracy " + acccuracyOfAmmendedGoodData);
 			
 		
-		System.out.println( "The accuracy after the ammend from KNN classifier " + acccuracyOnTestDataWithAmmendedWithKNNData);
+		System.out.println( "The accuracy after the ammend from KNN classifier " + accuracyOfAmmendedWithKNNPredictions);
 		
-		System.out.println("The accuracy after the data validated is " + acccuracyOnTestDataWithAmmendedWithCrossValidatedData);
+		System.out.println("The accuracy after the data validated is " + accuracyOfAmmendedWithCrossValidatedData);
 
 		}
+	
+	public static double getAccuracyOnaSetWithInitalParameter(List<PojoRow> list, InitialParameters baseModel){
+		double accuracy = 0; 
+		double countOfCorrect = 0;
+		for ( PojoRow p : list){
+			double toDouble = p.label; 
+			double prediction = NafiBayesModel.classify(
+					baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
+					baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
+					baseModel.posCgood,
+					baseModel.posCbad, p.features.toArray()); 
+			if ( prediction == toDouble){
+				countOfCorrect ++;
+			}
+		}
+		accuracy = countOfCorrect/(double)list.size();
+		
+		return accuracy;
+	}
+	public static double getAccuracyOnaSetWithAmmendedManager(List<PojoRow> list, AmmendManager ammendedClassifier){
+		double accuracy = 0; 
+		double countOfCorrect = 0;
+		
+		for ( PojoRow p : list){
+			double toDouble = p.label;
+			double prediction = NafiBayesModel.classify(
+					ammendedClassifier.possibilityOfXEq1givenCgood, ammendedClassifier.possibilityOfXEq0givenCgood,
+					ammendedClassifier.possibilityOfX흎1givenCbad, ammendedClassifier.possibilityOfX흎0givenCbad,
+					ammendedClassifier.posCgood,
+					ammendedClassifier.posCbad, p.features.toArray());
+			if (  prediction == toDouble){
+				countOfCorrect ++;
+			}
+		}
+		accuracy = countOfCorrect/(double)list.size();
+		return accuracy;
+
+	}
 	
  public static List<PojoRow> getCrossValidatedTweets(List<PojoRow> list, InitialParameters baseModel){
 	 List<PojoRow> validatedList = new ArrayList<PojoRow>();
