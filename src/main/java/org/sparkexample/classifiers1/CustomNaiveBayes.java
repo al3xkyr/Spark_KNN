@@ -46,7 +46,7 @@ public class CustomNaiveBayes {
 		// getting the test data on driver
 		List<PojoRow> initTestDataCollected = initTestData.collect();
 		// creating the initial model
-		 InitialParameters baseModel = new InitialParameters(trainingData);
+		 final InitialParameters baseModel = new InitialParameters(trainingData);
 		 double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
 		 
 		 // training the knn classifier
