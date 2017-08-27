@@ -140,6 +140,13 @@ public class DataExtraction implements Serializable {
 				} else {
 					love = 0;
 				}
+				double laugh; 
+				boolean laughbool = dataFeature.getData().getBoolean("__LAUGH__");
+				if(laughbool ){
+					laugh = 1 ;
+				} else {
+					laugh = 0 ; 
+				}
 				// breaking the double value for total swn score based on the
 				// observations about the polarity of the tweet by means
 				double swn_positive = 0;
@@ -166,8 +173,7 @@ public class DataExtraction implements Serializable {
 				// double[] arrayofVector = { swn_positive, swn_negative,
 				// swn_somewhatPositive, swn_neutural,
 				// swn_somewhatNegative, neg, ohso, capital, isMetaphor, love };
-				double[] arrayofVector = {  posSm, neg, ohso, capital, isMetaphor, love, swn_positive, swn_negative,  swn_somewhatPositive,
-						swn_neutural, swn_somewhatNegative};
+				double[] arrayofVector = {  laugh, neg, ohso, capital, isMetaphor, love};
 				Vector dv = Vectors.dense(arrayofVector);
 				PojoRow rowPojoforProcess = new PojoRow(dataFeature.getLable(), dv);
 				return rowPojoforProcess;
