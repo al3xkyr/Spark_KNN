@@ -5,12 +5,7 @@ import java.util.List;
 
 import org.sparkexample.pojo1.PojoRow;
 
-public class AmmendManager implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
+public class AmmendManager {
 	double[] possibilityOfXEq1givenCgood;
 	double[] possibilityOfX흎1givenCbad;
 	double[] possibilityOfXEq0givenCgood;
@@ -35,7 +30,7 @@ public class AmmendManager implements Serializable {
 		ammend(dataforAmmending, trainingDatacount);
 	}
 
-	public void ammend(List<PojoRow> listOfAmmendingTweets, long countOfTrainingData) {
+	private void ammend(List<PojoRow> listOfAmmendingTweets, long countOfTrainingData) {
 		Long long1 = new Long(countOfTrainingData);
 		double countOfTrainingDataDouble = long1.doubleValue();
 		double s = countOfTrainingDataDouble + listOfAmmendingTweets.size();
@@ -53,7 +48,7 @@ public class AmmendManager implements Serializable {
 		}
 	}
 
-	public void setPXc(PojoRow tweet) {
+	private void setPXc(PojoRow tweet) {
 		if (tweet.label == 1.0) {
 			double m = 2 + this.numberOfCgood;
 			double[] tweetFeatures = tweet.features.toArray();
@@ -61,11 +56,11 @@ public class AmmendManager implements Serializable {
 				if (tweetFeatures[i] == 1) {
 					// for good tweets with 1
 					double tmp1 = this.possibilityOfXEq1givenCgood[i];
-					double newTmp1 = ((m / (m + 1)) * tmp1) + (1 / (m + 1));
+					double newTmp1 = ((m / (double)(m + 1)) * tmp1) + (1 / (double)(m + 1));
 					this.possibilityOfXEq1givenCgood[i] = newTmp1;
 					// for good tweets with 0
 					double tmp0 = this.possibilityOfXEq0givenCgood[i];
-					double newTmp0 = ((m / (m + 1)) * tmp0);
+					double newTmp0 = ((m / (double) (m + 1)) * tmp0);
 					this.possibilityOfXEq0givenCgood[i] = newTmp0;
 				}
 			}
@@ -76,38 +71,16 @@ public class AmmendManager implements Serializable {
 				if (tweetFeatures[i] == 1) {
 					// for good tweets with 1
 					double tmp1 = this.possibilityOfX흎1givenCbad[i];
-					double newTmp1 = ((m / (m + 1)) * tmp1) + (1 / (m + 1));
+					double newTmp1 = ((m / (double)(m + 1)) * tmp1) + (1 / (double)(m + 1));
 					this.possibilityOfX흎1givenCbad[i] = newTmp1;
 					// for good tweets with 0
 					double tmp0 = this.possibilityOfX흎0givenCbad[i]; 
-					double newTmp0 = ((m / (m + 1)) * tmp0);
+					double newTmp0 = ((m / (double)(m + 1)) * tmp0);
 					this.possibilityOfX흎0givenCbad[i] = newTmp0;
 				}
 			}
 		}
 	}
 
-	public double[] getPossibilityOfXEq1givenCgood() {
-		return possibilityOfXEq1givenCgood;
-	}
-
-	public double[] getPossibilityOfX흎1givenCbad() {
-		return possibilityOfX흎1givenCbad;
-	}
-
-	public double[] getPossibilityOfXEq0givenCgood() {
-		return possibilityOfXEq0givenCgood;
-	}
-
-	public double[] getPossibilityOfX흎0givenCbad() {
-		return possibilityOfX흎0givenCbad;
-	}
-
-	public double getPosCgood() {
-		return posCgood;
-	}
-
-	public double getPosCbad() {
-		return posCbad;
-	}
+	
 }

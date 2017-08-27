@@ -26,30 +26,51 @@ public class CustomNaiveBayes {
 		SparkSession sqlSpark = new SparkSession(sc1);
 
 		// Load and parse the data file.
-		
-		DataExtraction data = new DataExtraction(sc1);
+		// Training data 40k tweets
+		String trainingDatapath = "data/60000tweetsTrain.csv";
+		DataExtraction dataTrain = new DataExtraction(sc1, trainingDatapath);
+		// Test and ammending data 20K tweets
+		String testDatapath = "data/60000tweetsTest.csv";
+		DataExtraction dataTest = new DataExtraction(sc1, testDatapath);
 
 		// Split the data into training and test sets (30% held out for testing)
-		JavaRDD<PojoRow>[] splits = data.getDatalabeledPoint().randomSplit(new double[] { 0.5, 0.1, 0.2, 0.2,});
 
-		JavaRDD<PojoRow> trainingData = splits[0];
-		JavaRDD<PojoRow> initTestData = splits[1]; 
+		JavaRDD<PojoRow> trainingData = dataTrain.getDatalabeledPoint();
+		JavaRDD<PojoRow>[] splits = dataTest.getDatalabeledPoint().randomSplit(new double[] { 0.5,  0.3, 0.2,});
+		JavaRDD<PojoRow> initTestData = splits[0]; 
 
-		JavaRDD<PojoRow> ammendedDataForOptimalAccuracy = splits[2];
-		JavaRDD<PojoRow> ammendedDataForKNNAccuracy = splits[3];
+		JavaRDD<PojoRow> ammendedDataForOptimalAccuracy = splits[1];
+		JavaRDD<PojoRow> ammendedDataForKNNAccuracy = splits[2];
 		
 
-
-		
+		// getting the test data on driver
+		List<PojoRow> initTestDataCollected = initTestData.collect();
+		// creating the initial model
 		 InitialParameters baseModel = new InitialParameters(trainingData);
+		 double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
+		 
+		 // training the knn classifier
 		 KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
+		 
+		 // geting corrected data for ammending
 		 List<PojoRow> rightDataforAmmending = ammendedDataForOptimalAccuracy.collect();
-		 AmmendManager ammendWithRightdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
-				, baseModel.possibilityOfX흎1givenCbad, 
-				baseModel.possibilityOfXEq0givenCgood, 
-				baseModel.possibilityOfX흎0givenCbad, 
-				baseModel.posCgood, 
-				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
+		 
+		 //storing variables in order to isolate them 
+		 double[] possibilitiesX1C1 = baseModel.possibilityOfXEq1givenCgood;
+		 double[] possibilitiesX1C0 = baseModel.possibilityOfX흎1givenCbad;
+		 double[] possibilitiesX0C1 = baseModel.possibilityOfXEq0givenCgood;
+		 double[] possibilitiesX0C0 = baseModel.possibilityOfX흎0givenCbad;
+		 double posGood = baseModel.posCgood;
+		 double posBad = baseModel.posCbad;
+		 double goodNumber = baseModel.goodTweetNumber;
+		 double badNumber = baseModel.badTweetNumber;
+		 
+		 AmmendManager ammendWithRightdata = new AmmendManager(possibilitiesX1C1
+				, possibilitiesX1C0, 
+				possibilitiesX0C1, 
+				possibilitiesX0C0, 
+				posGood, 
+				posBad, goodNumber, badNumber,
 				rightDataforAmmending, 
 				trainingData.count());
 		
@@ -75,8 +96,8 @@ public class CustomNaiveBayes {
 		
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
-		List<PojoRow> initTestDataCollected = initTestData.collect();
-		double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
+		
+		
 		double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
 		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
 		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);

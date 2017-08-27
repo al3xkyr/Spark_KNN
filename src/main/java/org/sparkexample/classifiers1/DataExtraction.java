@@ -22,10 +22,10 @@ public class DataExtraction implements Serializable {
 
 	private String datapath;
 
-	public DataExtraction(SparkContext sc1) {
+	public DataExtraction(SparkContext sc1 , String datapath) {
 		this.sc1 = sc1;
 
-		this.datapath = "data/60000tweets.csv";
+		this.datapath = datapath;
 
 	}
 
@@ -166,7 +166,7 @@ public class DataExtraction implements Serializable {
 				// double[] arrayofVector = { swn_positive, swn_negative,
 				// swn_somewhatPositive, swn_neutural,
 				// swn_somewhatNegative, neg, ohso, capital, isMetaphor, love };
-				double[] arrayofVector = {  neg, ohso, capital, isMetaphor, love, swn_positive, swn_negative,  swn_somewhatPositive,
+				double[] arrayofVector = {  posSm, neg, ohso, capital, isMetaphor, love, swn_positive, swn_negative,  swn_somewhatPositive,
 						swn_neutural, swn_somewhatNegative};
 				Vector dv = Vectors.dense(arrayofVector);
 				PojoRow rowPojoforProcess = new PojoRow(dataFeature.getLable(), dv);
