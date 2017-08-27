@@ -16,16 +16,16 @@ public class InitialParameters implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	
-	public  double[] possibilityOfXEq1givenCgood ;
-	public  double[] possibilityOfX흎1givenCbad ;
-	public  double[] possibilityOfXEq0givenCgood ;
-	public  double[] possibilityOfX흎0givenCbad ;
+	private  double[] possibilityOfXEq1givenCgood ;
+	private  double[] possibilityOfX흎1givenCbad ;
+	private  double[] possibilityOfXEq0givenCgood ;
+	private  double[] possibilityOfX흎0givenCbad ;
 	
 	
-	public double posCgood;
-	public double posCbad;
-	public double goodTweetNumber;
-	public double badTweetNumber;
+	private double posCgood;
+	private double posCbad;
+	private double goodTweetNumber;
+	private double badTweetNumber;
 	public InitialParameters (JavaRDD<PojoRow> trainingData){
 		constructPC(trainingData);
 	}
@@ -33,7 +33,7 @@ public class InitialParameters implements Serializable {
 	
 	
 	
-	public void constructPC(JavaRDD<PojoRow> trainingData){
+	private void constructPC(JavaRDD<PojoRow> trainingData){
 		double trainingDataCount = trainingData.count();
 		JavaRDD<PojoRow> goodTweetMap = trainingData.filter(new Function<PojoRow, Boolean>() {
 
@@ -58,15 +58,15 @@ public class InitialParameters implements Serializable {
 			}
 		}).cache();
 
-		goodTweetNumber = goodTweetMap.count();
-		badTweetNumber = badTweetMap.count();
+		this.goodTweetNumber = goodTweetMap.count();
+		this.badTweetNumber = badTweetMap.count();
 		// p(c=1) pithanotita twn kalwn tweets sto set
 		long goodTweetMapNumber = goodTweetMap.count();
 		long badTweetMapNumber = badTweetMap.count();
 		final Double probabilityCequalsGoodtweet = goodTweetMap.count() / trainingDataCount;
 		final Double probabilityCequalsBadTweet = 1 - probabilityCequalsGoodtweet;
-		posCgood = probabilityCequalsGoodtweet;
-		posCbad = probabilityCequalsBadTweet;
+		this.posCgood = probabilityCequalsGoodtweet;
+		this.posCbad = probabilityCequalsBadTweet;
 
 		// It counts the values of 1 on P(x|c) in order to P(A=1|c=positive) 
 		PojoRow pojoOfSumOfGoodTweets = goodTweetMap.reduce(new Function2<PojoRow, PojoRow, PojoRow>() {
@@ -97,10 +97,10 @@ public class InitialParameters implements Serializable {
 			}
 		});
 		
-		possibilityOfXEq1givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, true).features.toArray();
-		possibilityOfXEq0givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, false).features.toArray();
-		possibilityOfX흎1givenCbad = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfBadTweets, badTweetMapNumber, true).features.toArray();
-		possibilityOfX흎0givenCbad =  addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, badTweetMapNumber, false).features.toArray();
+		this.possibilityOfXEq1givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, true).features.toArray();
+		this.possibilityOfXEq0givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, false).features.toArray();
+		this.possibilityOfX흎1givenCbad = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfBadTweets, badTweetMapNumber, true).features.toArray();
+		this.possibilityOfX흎0givenCbad =  addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, badTweetMapNumber, false).features.toArray();
 	}
 	/**
 	 * This method exist to calclulate the initial P(X|C) 
@@ -125,5 +125,117 @@ public class InitialParameters implements Serializable {
 		}
 		
 		return new PojoRow(pojoOfSumOfGoodTweets.label, Vectors.dense(arrayOfProbabilitites));
+	}
+
+
+
+
+	public double[] getPossibilityOfXEq1givenCgood() {
+		return possibilityOfXEq1givenCgood;
+	}
+
+
+
+
+	public void setPossibilityOfXEq1givenCgood(double[] possibilityOfXEq1givenCgood) {
+		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
+	}
+
+
+
+
+	public double[] getPossibilityOfX흎1givenCbad() {
+		return possibilityOfX흎1givenCbad;
+	}
+
+
+
+
+	public void setPossibilityOfX흎1givenCbad(double[] possibilityOfX흎1givenCbad) {
+		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+	}
+
+
+
+
+	public double[] getPossibilityOfXEq0givenCgood() {
+		return possibilityOfXEq0givenCgood;
+	}
+
+
+
+
+	public void setPossibilityOfXEq0givenCgood(double[] possibilityOfXEq0givenCgood) {
+		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
+	}
+
+
+
+
+	public double[] getPossibilityOfX흎0givenCbad() {
+		return possibilityOfX흎0givenCbad;
+	}
+
+
+
+
+	public void setPossibilityOfX흎0givenCbad(double[] possibilityOfX흎0givenCbad) {
+		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
+	}
+
+
+
+
+	public double getPosCgood() {
+		return posCgood;
+	}
+
+
+
+
+	public void setPosCgood(double posCgood) {
+		this.posCgood = posCgood;
+	}
+
+
+
+
+	public double getPosCbad() {
+		return posCbad;
+	}
+
+
+
+
+	public void setPosCbad(double posCbad) {
+		this.posCbad = posCbad;
+	}
+
+
+
+
+	public double getGoodTweetNumber() {
+		return goodTweetNumber;
+	}
+
+
+
+
+	public void setGoodTweetNumber(double goodTweetNumber) {
+		this.goodTweetNumber = goodTweetNumber;
+	}
+
+
+
+
+	public double getBadTweetNumber() {
+		return badTweetNumber;
+	}
+
+
+
+
+	public void setBadTweetNumber(double badTweetNumber) {
+		this.badTweetNumber = badTweetNumber;
 	}
 }

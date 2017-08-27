@@ -56,14 +56,14 @@ public class CustomNaiveBayes {
 		 List<PojoRow> rightDataforAmmending = ammendedDataForOptimalAccuracy.collect();
 		 
 		 //storing variables in order to isolate them 
-		 double[] possibilitiesX1C1 = baseModel.possibilityOfXEq1givenCgood;
-		 double[] possibilitiesX1C0 = baseModel.possibilityOfX흎1givenCbad;
-		 double[] possibilitiesX0C1 = baseModel.possibilityOfXEq0givenCgood;
-		 double[] possibilitiesX0C0 = baseModel.possibilityOfX흎0givenCbad;
-		 double posGood = baseModel.posCgood;
-		 double posBad = baseModel.posCbad;
-		 double goodNumber = baseModel.goodTweetNumber;
-		 double badNumber = baseModel.badTweetNumber;
+		 double[] possibilitiesX1C1 = baseModel.getPossibilityOfXEq1givenCgood();
+		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfX흎1givenCbad();
+		 double[] possibilitiesX0C1 = baseModel.getPossibilityOfXEq0givenCgood();
+		 double[] possibilitiesX0C0 = baseModel.getPossibilityOfX흎0givenCbad();
+		 double posGood = baseModel.getPosCgood();
+		 double posBad = baseModel.getPosCbad();
+		 double goodNumber = baseModel.getGoodTweetNumber();
+		 double badNumber = baseModel.getGoodTweetNumber();
 		 
 		 AmmendManager ammendWithRightdata = new AmmendManager(possibilitiesX1C1
 				, possibilitiesX1C0, 
@@ -73,24 +73,25 @@ public class CustomNaiveBayes {
 				posBad, goodNumber, badNumber,
 				rightDataforAmmending, 
 				trainingData.count());
+		 double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
 		
 		 List<PojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);
-		 AmmendManager ammendWithKNNdata = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
-				, baseModel.possibilityOfX흎1givenCbad, 
-				baseModel.possibilityOfXEq0givenCgood, 
-				baseModel.possibilityOfX흎0givenCbad, 
-				baseModel.posCgood, 
-				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
+		 AmmendManager ammendWithKNNdata = new AmmendManager(possibilitiesX1C1
+					, possibilitiesX1C0, 
+					possibilitiesX0C1, 
+					possibilitiesX0C0, 
+					posGood, 
+					posBad, goodNumber, badNumber,
 				knnDataForAmmending, 
 				trainingData.count());
 		 
 		 List<PojoRow> crossValidatedData = getCrossValidatedTweets(knnDataForAmmending, baseModel);
-		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(baseModel.possibilityOfXEq1givenCgood
-				, baseModel.possibilityOfX흎1givenCbad, 
-				baseModel.possibilityOfXEq0givenCgood, 
-				baseModel.possibilityOfX흎0givenCbad, 
-				baseModel.posCgood, 
-				baseModel.posCbad, baseModel.goodTweetNumber, baseModel.badTweetNumber,
+		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
+					, possibilitiesX1C0, 
+					possibilitiesX0C1, 
+					possibilitiesX0C0, 
+					posGood, 
+					posBad, goodNumber, badNumber,
 				crossValidatedData,
 				trainingData.count());
 		
@@ -98,7 +99,7 @@ public class CustomNaiveBayes {
 		// calculating accuracy of Naive old model in testDataForValidation
 		
 		
-		double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
+		
 		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
 		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
 		///==================================Ideal scenario of ammending good data======================================================
@@ -124,10 +125,10 @@ public class CustomNaiveBayes {
 		for ( PojoRow p : list){
 			double toDouble = p.label; 
 			double prediction = NafiBayesModel.classify(
-					baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
-					baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
-					baseModel.posCgood,
-					baseModel.posCbad, p.features.toArray()); 
+					baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
+					baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+					baseModel.getPosCgood(),
+					baseModel.getPosCbad(), p.features.toArray()); 
 			if ( prediction == toDouble){
 				countOfCorrect ++;
 			}
@@ -143,10 +144,10 @@ public class CustomNaiveBayes {
 		for ( PojoRow p : list){
 			double toDouble = p.label;
 			double prediction = NafiBayesModel.classify(
-					ammendedClassifier.possibilityOfXEq1givenCgood, ammendedClassifier.possibilityOfXEq0givenCgood,
-					ammendedClassifier.possibilityOfX흎1givenCbad, ammendedClassifier.possibilityOfX흎0givenCbad,
-					ammendedClassifier.posCgood,
-					ammendedClassifier.posCbad, p.features.toArray());
+					ammendedClassifier.getPossibilityOfXEq1givenCgood(), ammendedClassifier.getPossibilityOfXEq0givenCgood(),
+					ammendedClassifier.getPossibilityOfX흎1givenCbad(), ammendedClassifier.getPossibilityOfX흎0givenCbad(),
+					ammendedClassifier.getPosCgood(),
+					ammendedClassifier.getPosCbad(), p.features.toArray());
 			if (  prediction == toDouble){
 				countOfCorrect ++;
 			}
@@ -161,10 +162,10 @@ public class CustomNaiveBayes {
 	 for (PojoRow pojo : list){
 		 
 		if( NafiBayesModel.classify(
-				 baseModel.possibilityOfXEq1givenCgood, baseModel.possibilityOfXEq0givenCgood,
-				 baseModel.possibilityOfX흎1givenCbad, baseModel.possibilityOfX흎0givenCbad,
-				 baseModel.posCgood,
-				 baseModel.posCbad, pojo.features.toArray())== pojo.label){
+				 baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
+				 baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+				 baseModel.getPosCgood(),
+				 baseModel.getPosCbad(), pojo.features.toArray())== pojo.label){
 		validatedList.add(pojo);	
 		}
 		

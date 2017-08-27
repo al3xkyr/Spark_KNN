@@ -6,13 +6,13 @@ import java.util.List;
 import org.sparkexample.pojo1.PojoRow;
 
 public class AmmendManager {
-	double[] possibilityOfXEq1givenCgood;
-	double[] possibilityOfX흎1givenCbad;
-	double[] possibilityOfXEq0givenCgood;
-	double[] possibilityOfX흎0givenCbad;
+	private double[] possibilityOfXEq1givenCgood;
+	private double[] possibilityOfX흎1givenCbad;
+	private double[] possibilityOfXEq0givenCgood;
+	private double[] possibilityOfX흎0givenCbad;
 
-	double posCgood;
-	double posCbad;
+	private double posCgood;
+	private double posCbad;
 	private double numberOfCgood;
 	private double numberOfCbad;
 
@@ -80,6 +80,70 @@ public class AmmendManager {
 				}
 			}
 		}
+	}
+
+	public double[] getPossibilityOfXEq1givenCgood() {
+		return possibilityOfXEq1givenCgood;
+	}
+
+	public void setPossibilityOfXEq1givenCgood(double[] possibilityOfXEq1givenCgood) {
+		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
+	}
+
+	public double[] getPossibilityOfX흎1givenCbad() {
+		return possibilityOfX흎1givenCbad;
+	}
+
+	public void setPossibilityOfX흎1givenCbad(double[] possibilityOfX흎1givenCbad) {
+		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+	}
+
+	public double[] getPossibilityOfXEq0givenCgood() {
+		return possibilityOfXEq0givenCgood;
+	}
+
+	public void setPossibilityOfXEq0givenCgood(double[] possibilityOfXEq0givenCgood) {
+		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
+	}
+
+	public double[] getPossibilityOfX흎0givenCbad() {
+		return possibilityOfX흎0givenCbad;
+	}
+
+	public void setPossibilityOfX흎0givenCbad(double[] possibilityOfX흎0givenCbad) {
+		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
+	}
+
+	public double getPosCgood() {
+		return posCgood;
+	}
+
+	public void setPosCgood(double posCgood) {
+		this.posCgood = posCgood;
+	}
+
+	public double getPosCbad() {
+		return posCbad;
+	}
+
+	public void setPosCbad(double posCbad) {
+		this.posCbad = posCbad;
+	}
+
+	public double getNumberOfCgood() {
+		return numberOfCgood;
+	}
+
+	public void setNumberOfCgood(double numberOfCgood) {
+		this.numberOfCgood = numberOfCgood;
+	}
+
+	public double getNumberOfCbad() {
+		return numberOfCbad;
+	}
+
+	public void setNumberOfCbad(double numberOfCbad) {
+		this.numberOfCbad = numberOfCbad;
 	}
 
 	
