@@ -1,4 +1,4 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.SparkSession;
-import org.sparkexample.pojo1.PojoRow;
+import org.sparkexample.pojo.PojoRow;
 
 import scala.Tuple2;
 
@@ -124,7 +124,7 @@ public class CustomNaiveBayes {
 		double countOfCorrect = 0;
 		for ( PojoRow p : list){
 			double toDouble = p.label; 
-			double prediction = NafiBayesModel.classify(
+			double prediction = NaiveBayesModel.classify(
 					baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
 					baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
 					baseModel.getPosCgood(),
@@ -143,7 +143,7 @@ public class CustomNaiveBayes {
 		
 		for ( PojoRow p : list){
 			double toDouble = p.label;
-			double prediction = NafiBayesModel.classify(
+			double prediction = NaiveBayesModel.classify(
 					ammendedClassifier.getPossibilityOfXEq1givenCgood(), ammendedClassifier.getPossibilityOfXEq0givenCgood(),
 					ammendedClassifier.getPossibilityOfX흎1givenCbad(), ammendedClassifier.getPossibilityOfX흎0givenCbad(),
 					ammendedClassifier.getPosCgood(),
@@ -161,7 +161,7 @@ public class CustomNaiveBayes {
 	 List<PojoRow> validatedList = new ArrayList<PojoRow>();
 	 for (PojoRow pojo : list){
 		 
-		if( NafiBayesModel.classify(
+		if( NaiveBayesModel.classify(
 				 baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
 				 baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
 				 baseModel.getPosCgood(),

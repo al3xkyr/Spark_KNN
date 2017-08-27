@@ -1,4 +1,4 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.sparkexample.pojo1.PojoRow;
+import org.sparkexample.pojo.PojoRow;
 
 import scala.Tuple2;
 

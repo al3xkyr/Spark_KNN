@@ -1,4 +1,4 @@
-package org.sparkexample.pojo1;
+package org.sparkexample.pojo;
 
 import java.io.Serializable;
 

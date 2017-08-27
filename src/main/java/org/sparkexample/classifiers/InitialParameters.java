@@ -1,4 +1,4 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
 import java.io.Serializable;
 import java.util.Vector;
@@ -7,7 +7,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.ml.linalg.Vectors;
-import org.sparkexample.pojo1.PojoRow;
+import org.sparkexample.pojo.PojoRow;
 
 public class InitialParameters implements Serializable {
 	/**

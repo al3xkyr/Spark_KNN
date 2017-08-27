@@ -1,9 +1,9 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
 import java.io.Serializable;
 import java.util.List;
 
-import org.sparkexample.pojo1.PojoRow;
+import org.sparkexample.pojo.PojoRow;
 
 public class AmmendManager {
 	private double[] possibilityOfXEq1givenCgood;

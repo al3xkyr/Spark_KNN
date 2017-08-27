@@ -1,4 +1,4 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
 import java.io.Serializable;
 
@@ -9,8 +9,8 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.linalg.Vectors;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.sparkexample.pojo1.DataFeature;
-import org.sparkexample.pojo1.PojoRow;
+import org.sparkexample.pojo.DataFeature;
+import org.sparkexample.pojo.PojoRow;
 
 public class DataExtraction implements Serializable {
 	/**
@@ -173,7 +173,7 @@ public class DataExtraction implements Serializable {
 				// double[] arrayofVector = { swn_positive, swn_negative,
 				// swn_somewhatPositive, swn_neutural,
 				// swn_somewhatNegative, neg, ohso, capital, isMetaphor, love };
-				double[] arrayofVector = {  laugh, neg, ohso, capital, isMetaphor, love};
+				double[] arrayofVector = { posSm, negSm, laugh, neg, ohso, capital, isMetaphor, love};
 				Vector dv = Vectors.dense(arrayofVector);
 				PojoRow rowPojoforProcess = new PojoRow(dataFeature.getLable(), dv);
 				return rowPojoforProcess;

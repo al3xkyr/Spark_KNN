@@ -1,6 +1,6 @@
-package org.sparkexample.classifiers1;
+package org.sparkexample.classifiers;
 
-public class NafiBayesModel {
+public class NaiveBayesModel {
 
 	public static double calculatePxgivenC (double[] possibilityOfXEq1,
 			double[] possibilityOfXEq0 ,	double[] featureForClassification)
