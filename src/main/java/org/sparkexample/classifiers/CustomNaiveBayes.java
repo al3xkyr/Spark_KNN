@@ -5,10 +5,8 @@ import java.util.List;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.SparkSession;
 import org.sparkexample.pojo.PojoRow;
 
@@ -23,7 +21,7 @@ public class CustomNaiveBayes {
 		 */
 		SparkContext sc1 = new SparkContext(sparkConf);
 		@SuppressWarnings("resource")
-		SparkSession sqlSpark = new SparkSession(sc1);
+		SparkSession sparkSession = new SparkSession(sc1);
 
 		// Load and parse the data file.
 		// Training data 40k tweets
@@ -46,15 +44,19 @@ public class CustomNaiveBayes {
 		// getting the test data on driver
 		List<PojoRow> initTestDataCollected = initTestData.collect();
 		// creating the initial model
-		 final InitialParameters baseModel = new InitialParameters(trainingData);
-		 double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
+		AccuracyManager accuracyManager = new AccuracyManager();
+		InitialParameters baseModel = new InitialParameters(trainingData);
+		 
+		 double accuracyOfInitModel = accuracyManager.getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
 		 
 		 // training the knn classifier
 		 KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
 		 
 		 // geting corrected data for ammending
 		 List<PojoRow> rightDataforAmmending = ammendedDataForOptimalAccuracy.collect();
-		 
+		 long countOfTrainingData = trainingData.count();
+		 //sparkSession.close();
+		 //System.out.println("pernaei apo close ");
 		 //storing variables in order to isolate them 
 		 double[] possibilitiesX1C1 = baseModel.getPossibilityOfXEq1givenCgood();
 		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfX흎1givenCbad();
@@ -72,8 +74,10 @@ public class CustomNaiveBayes {
 				posGood, 
 				posBad, goodNumber, badNumber,
 				rightDataforAmmending, 
-				trainingData.count());
-		 double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
+				countOfTrainingData);
+		 ammendWithRightdata.ammend();
+		 AccuracyManager accuracyManager1 = new AccuracyManager();
+		 double acccuracyOfAmmendedGoodData = accuracyManager1.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
 		
 		 List<PojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);
 		 AmmendManager ammendWithKNNdata = new AmmendManager(possibilitiesX1C1
@@ -83,9 +87,12 @@ public class CustomNaiveBayes {
 					posGood, 
 					posBad, goodNumber, badNumber,
 				knnDataForAmmending, 
-				trainingData.count());
+				countOfTrainingData);
 		 
-		 List<PojoRow> crossValidatedData = getCrossValidatedTweets(knnDataForAmmending, baseModel);
+		 ammendWithKNNdata.ammend();
+		 AccuracyManager accuracyManager2 = new AccuracyManager();
+			
+		 List<PojoRow> crossValidatedData = accuracyManager2.getCrossValidatedTweets(knnDataForAmmending, baseModel);
 		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
 					, possibilitiesX1C0, 
 					possibilitiesX0C1, 
@@ -93,20 +100,21 @@ public class CustomNaiveBayes {
 					posGood, 
 					posBad, goodNumber, badNumber,
 				crossValidatedData,
-				trainingData.count());
-		
+				countOfTrainingData);
+		 ammendWithCrossValidatedData.ammend();
 		// --------------end of sums ---------------and probabilities
 		// calculating accuracy of Naive old model in testDataForValidation
 		
 		
 		
-		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
-		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
+		double accuracyOfAmmendedWithKNNPredictions = accuracyManager2.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
+		double accuracyOfAmmendedWithCrossValidatedData = accuracyManager2.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
 		///==================================Ideal scenario of ammending good data======================================================
 		
 		
 		/// ==================================================Scenario of KNN data =================================================
-		
+		System.out.println("Data = "+ baseModel.toString() );
+		System.out.println( "Data = " + ammendWithRightdata.toString());
 		System.out.println("The accuracy of Old naive model with dataForValidation is "
 				+ accuracyOfInitModel);
 		
@@ -119,60 +127,8 @@ public class CustomNaiveBayes {
 
 		}
 	
-	public static double getAccuracyOnaSetWithInitalParameter(List<PojoRow> list, InitialParameters baseModel){
-		double accuracy = 0; 
-		double countOfCorrect = 0;
-		for ( PojoRow p : list){
-			double toDouble = p.label; 
-			double prediction = NaiveBayesModel.classify(
-					baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-					baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
-					baseModel.getPosCgood(),
-					baseModel.getPosCbad(), p.features.toArray()); 
-			if ( prediction == toDouble){
-				countOfCorrect ++;
-			}
-		}
-		accuracy = countOfCorrect/(double)list.size();
-		
-		return accuracy;
-	}
-	public static double getAccuracyOnaSetWithAmmendedManager(List<PojoRow> list, AmmendManager ammendedClassifier){
-		double accuracy = 0; 
-		double countOfCorrect = 0;
-		
-		for ( PojoRow p : list){
-			double toDouble = p.label;
-			double prediction = NaiveBayesModel.classify(
-					ammendedClassifier.getPossibilityOfXEq1givenCgood(), ammendedClassifier.getPossibilityOfXEq0givenCgood(),
-					ammendedClassifier.getPossibilityOfX흎1givenCbad(), ammendedClassifier.getPossibilityOfX흎0givenCbad(),
-					ammendedClassifier.getPosCgood(),
-					ammendedClassifier.getPosCbad(), p.features.toArray());
-			if (  prediction == toDouble){
-				countOfCorrect ++;
-			}
-		}
-		accuracy = countOfCorrect/(double)list.size();
-		return accuracy;
-
-	}
 	
- public static List<PojoRow> getCrossValidatedTweets(List<PojoRow> list, InitialParameters baseModel){
-	 List<PojoRow> validatedList = new ArrayList<PojoRow>();
-	 for (PojoRow pojo : list){
-		 
-		if( NaiveBayesModel.classify(
-				 baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-				 baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
-				 baseModel.getPosCgood(),
-				 baseModel.getPosCbad(), pojo.features.toArray())== pojo.label){
-		validatedList.add(pojo);	
-		}
-		
-	 }
-	 return validatedList;
-	 
- }
+
 
 	
 
