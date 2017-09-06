@@ -33,7 +33,6 @@ public class AmmendManager {
         this.numberOfCbad = numberOfCbad;
         this.dataforAmmending = dataforAmmending;
         this.trainingDatacount = trainingDatacount;
-        System.out.println("possibilityOfXEq1givenCgood1= " + Arrays.toString(this.possibilityOfXEq1givenCgood));
     }
 
     public void ammend() {

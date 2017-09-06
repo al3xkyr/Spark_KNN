@@ -244,9 +244,18 @@ public class InitialParameters implements Serializable {
 
 	@Override
 	public String toString() {
-		return "possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
-				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad) + "]";
+		return "InitialParameters [possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
+				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad)
+				+ ", possibilityOfXEq0givenCgood=" + Arrays.toString(possibilityOfXEq0givenCgood)
+				+ ", possibilityOfXEq0givenCbad=" + Arrays.toString(possibilityOfXEq0givenCbad) + ", posCgood="
+				+ posCgood + ", posCbad=" + posCbad + ", goodTweetNumber=" + goodTweetNumber + ", badTweetNumber="
+				+ badTweetNumber + "]";
 	}
+
+
+
+
+	
 	
 	
 	

@@ -32,13 +32,6 @@ public class AccuracyManager {
 
         for (PojoRow p : list) {
             double toDouble = p.label;
-            System.out.println("Ammended 1 given good " + Arrays.toString(ammendedClassifier.getPossibilityOfXEq1givenCgood()));
-//			System.out.println("Ammended 0 given good "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq0givenCgood()));
-//			System.out.println("Ammended 1 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq1givenCbad()));
-//			System.out.println("Ammended 0 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq0givenCbad()));
-//			System.out.println("Ammended pos number good"+ ammendedClassifier.getPosCgood());
-//			System.out.println("Ammended pos number bad "+ ammendedClassifier.getPosCbad());
-
 
             double prediction = new NaiveBayesModel().classifyUsingBernouliNaive(
                     ammendedClassifier.getPossibilityOfXEq1givenCgood(),
