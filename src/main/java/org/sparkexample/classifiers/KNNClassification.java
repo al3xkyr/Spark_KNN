@@ -21,13 +21,13 @@ import scala.Tuple2;
 
 public class KNNClassification implements Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	SparkSession sqlSpark ;
 	KNNClassificationModel model;
-	
+
 	public KNNClassification (JavaRDD<PojoRow> trainingData , SparkContext sc1){
 		this.sqlSpark = new SparkSession(sc1);
 		Dataset<Row> labeledPointDataset = sqlSpark.createDataFrame(trainingData, PojoRow.class);
@@ -40,7 +40,7 @@ public class KNNClassification implements Serializable {
 		// val.transform(labeledPointDataset, model.topTree(),
 		// model.subTrees());
 		// Creation of Dataset of testData for KNN
-		
+
 	}
 	public List<PojoRow> getPredictedRDD (JavaRDD<PojoRow> testDataForValidation){
 		Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testDataForValidation, PojoRow.class);
