@@ -57,9 +57,9 @@ public class CustomNaiveBayes {
 		 
 		 //storing variables in order to isolate them 
 		 double[] possibilitiesX1C1 = baseModel.getPossibilityOfXEq1givenCgood();
-		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfX흎1givenCbad();
+		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfXEq1givenCbad();
 		 double[] possibilitiesX0C1 = baseModel.getPossibilityOfXEq0givenCgood();
-		 double[] possibilitiesX0C0 = baseModel.getPossibilityOfX흎0givenCbad();
+		 double[] possibilitiesX0C0 = baseModel.getPossibilityOfXEq0givenCbad();
 		 double posGood = baseModel.getPosCgood();
 		 double posBad = baseModel.getPosCbad();
 		 double goodNumber = baseModel.getGoodTweetNumber();
@@ -126,7 +126,7 @@ public class CustomNaiveBayes {
 			double toDouble = p.label; 
 			double prediction = NaiveBayesModel.classify(
 					baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-					baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+					baseModel.getPossibilityOfXEq1givenCbad(), baseModel.getPossibilityOfXEq0givenCbad(),
 					baseModel.getPosCgood(),
 					baseModel.getPosCbad(), p.features.toArray()); 
 			if ( prediction == toDouble){
@@ -145,7 +145,7 @@ public class CustomNaiveBayes {
 			double toDouble = p.label;
 			double prediction = NaiveBayesModel.classify(
 					ammendedClassifier.getPossibilityOfXEq1givenCgood(), ammendedClassifier.getPossibilityOfXEq0givenCgood(),
-					ammendedClassifier.getPossibilityOfX흎1givenCbad(), ammendedClassifier.getPossibilityOfX흎0givenCbad(),
+					ammendedClassifier.getPossibilityOfXEq1givenCbad(), ammendedClassifier.getPossibilityOfXEq0givenCbad(),
 					ammendedClassifier.getPosCgood(),
 					ammendedClassifier.getPosCbad(), p.features.toArray());
 			if (  prediction == toDouble){
@@ -163,7 +163,7 @@ public class CustomNaiveBayes {
 		 
 		if( NaiveBayesModel.classify(
 				 baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-				 baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+				 baseModel.getPossibilityOfXEq1givenCbad(), baseModel.getPossibilityOfXEq0givenCbad(),
 				 baseModel.getPosCgood(),
 				 baseModel.getPosCbad(), pojo.features.toArray())== pojo.label){
 		validatedList.add(pojo);	

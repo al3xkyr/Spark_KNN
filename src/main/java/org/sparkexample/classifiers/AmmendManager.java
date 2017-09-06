@@ -7,22 +7,22 @@ import org.sparkexample.pojo.PojoRow;
 
 public class AmmendManager {
 	private double[] possibilityOfXEq1givenCgood;
-	private double[] possibilityOfX흎1givenCbad;
+	private double[] possibilityOfXEq1givenCbad;
 	private double[] possibilityOfXEq0givenCgood;
-	private double[] possibilityOfX흎0givenCbad;
+	private double[] possibilityOfXEq0givenCbad;
 
 	private double posCgood;
 	private double posCbad;
 	private double numberOfCgood;
 	private double numberOfCbad;
 
-	public AmmendManager(double[] possibilityOfXEq1givenCgood, double[] possibilityOfX흎1givenCbad,
-			double[] possibilityOfXEq0givenCgood, double[] possibilityOfX흎0givenCbad, double posCgood, double posCbad,
+	public AmmendManager(double[] possibilityOfXEq1givenCgood, double[] possibilityOfXEq1givenCbad,
+			double[] possibilityOfXEq0givenCgood, double[] possibilityOfXEq0givenCbad, double posCgood, double posCbad,
 			double numberOfCgood, double numberOfCbad,List<PojoRow> dataforAmmending, long trainingDatacount) {
 		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
 		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
-		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
-		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+		this.possibilityOfXEq0givenCbad = possibilityOfXEq0givenCbad;
+		this.possibilityOfXEq1givenCbad = possibilityOfXEq1givenCbad;
 		this.posCbad = posCbad;
 		this.posCgood = posCgood;
 		this.numberOfCgood = numberOfCgood;
@@ -70,13 +70,13 @@ public class AmmendManager {
 			for (int i = 0; i < tweetFeatures.length; i++) {
 				if (tweetFeatures[i] == 1) {
 					// for good tweets with 1
-					double tmp1 = this.possibilityOfX흎1givenCbad[i];
+					double tmp1 = this.possibilityOfXEq1givenCbad[i];
 					double newTmp1 = ((m / (double)(m + 1)) * tmp1) + (1 / (double)(m + 1));
-					this.possibilityOfX흎1givenCbad[i] = newTmp1;
+					this.possibilityOfXEq1givenCbad[i] = newTmp1;
 					// for good tweets with 0
-					double tmp0 = this.possibilityOfX흎0givenCbad[i]; 
+					double tmp0 = this.possibilityOfXEq0givenCbad[i]; 
 					double newTmp0 = ((m / (double)(m + 1)) * tmp0);
-					this.possibilityOfX흎0givenCbad[i] = newTmp0;
+					this.possibilityOfXEq0givenCbad[i] = newTmp0;
 				}
 			}
 		}
@@ -90,12 +90,12 @@ public class AmmendManager {
 		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
 	}
 
-	public double[] getPossibilityOfX흎1givenCbad() {
-		return possibilityOfX흎1givenCbad;
+	public double[] getPossibilityOfXEq1givenCbad() {
+		return possibilityOfXEq1givenCbad;
 	}
 
-	public void setPossibilityOfX흎1givenCbad(double[] possibilityOfX흎1givenCbad) {
-		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+	public void setPossibilityOfXEq1givenCbad(double[] possibilityOfXEq1givenCbad) {
+		this.possibilityOfXEq1givenCbad = possibilityOfXEq1givenCbad;
 	}
 
 	public double[] getPossibilityOfXEq0givenCgood() {
@@ -106,12 +106,12 @@ public class AmmendManager {
 		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
 	}
 
-	public double[] getPossibilityOfX흎0givenCbad() {
-		return possibilityOfX흎0givenCbad;
+	public double[] getPossibilityOfXEq0givenCbad() {
+		return possibilityOfXEq0givenCbad;
 	}
 
-	public void setPossibilityOfX흎0givenCbad(double[] possibilityOfX흎0givenCbad) {
-		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
+	public void setPossibilityOfXEq0givenCbad(double[] possibilityOfXEq0givenCbad) {
+		this.possibilityOfXEq0givenCbad = possibilityOfXEq0givenCbad;
 	}
 
 	public double getPosCgood() {

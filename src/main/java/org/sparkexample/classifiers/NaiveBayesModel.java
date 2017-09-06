@@ -20,13 +20,13 @@ public class NaiveBayesModel {
 	public static double classify(
 			double[] possibilityOfXEq1givenCgood, 
 			double[] possibilityOfXEq0givenCgood,
-			double[] possibilityOfX흎1givenCbad,
-			double[] possibilityOfX흎0givenCbad,
+			double[] possibilityOfXEq1givenCbad,
+			double[] possibilityOfXEq0givenCbad,
 			double possibilityOfCgood, 
 			double possibilityOfCbad,
 			double[] featureForClassification) {
 		double pXgivenCgood = calculatePxgivenC(possibilityOfXEq1givenCgood, possibilityOfXEq0givenCgood, featureForClassification);
-		double pXgivenCbad = calculatePxgivenC(possibilityOfX흎1givenCbad, possibilityOfX흎0givenCbad, featureForClassification);
+		double pXgivenCbad = calculatePxgivenC(possibilityOfXEq1givenCbad, possibilityOfXEq0givenCbad, featureForClassification);
 		if ((pXgivenCgood * possibilityOfCgood) > (pXgivenCbad * possibilityOfCbad)) {
 			return (double) 1;
 		}
