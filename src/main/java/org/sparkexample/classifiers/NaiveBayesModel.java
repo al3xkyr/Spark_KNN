@@ -32,13 +32,13 @@ public class NaiveBayesModel {
 	public  double classifyUsingSimpleNaive(
 			double[] possibilityOfXEq1givenCgood, 
 			double[] possibilityOfXEq0givenCgood,
-			double[] possibilityOfX흎1givenCbad,
-			double[] possibilityOfX흎0givenCbad,
+			double[] possibilityOfXEq1givenCbad,
+			double[] possibilityOfXEq0givenCbad,
 			double possibilityOfCgood, 
 			double possibilityOfCbad,
 			double[] featureForClassification) {
 		double pXgivenCgood = calculatePxgivenCUsingSimpleNaive(possibilityOfXEq1givenCgood, possibilityOfXEq0givenCgood, featureForClassification);
-		double pXgivenCbad = calculatePxgivenCUsingSimpleNaive(possibilityOfX흎1givenCbad, possibilityOfX흎0givenCbad, featureForClassification);
+		double pXgivenCbad = calculatePxgivenCUsingSimpleNaive(possibilityOfXEq1givenCbad, possibilityOfXEq0givenCbad, featureForClassification);
 		if ((pXgivenCgood * possibilityOfCgood) > (pXgivenCbad * possibilityOfCbad)) {
 			return (double) 1;
 		}
@@ -49,13 +49,13 @@ public class NaiveBayesModel {
 	public  double classifyUsingBernouliNaive(
 			double[] possibilityOfXEq1givenCgood, 
 			double[] possibilityOfXEq0givenCgood,
-			double[] possibilityOfX흎1givenCbad,
-			double[] possibilityOfX흎0givenCbad,
+			double[] possibilityOfXEq1givenCbad,
+			double[] possibilityOfXEq0givenCbad,
 			double possibilityOfCgood, 
 			double possibilityOfCbad,
 			double[] featureForClassification) {
 		double pXgivenCgood = calculatePxgivenCUsingBernouliNaive(possibilityOfXEq1givenCgood, possibilityOfXEq0givenCgood, featureForClassification);
-		double pXgivenCbad = calculatePxgivenCUsingBernouliNaive(possibilityOfX흎1givenCbad, possibilityOfX흎0givenCbad, featureForClassification);
+		double pXgivenCbad = calculatePxgivenCUsingBernouliNaive(possibilityOfXEq1givenCbad, possibilityOfXEq0givenCbad, featureForClassification);
 		if ((pXgivenCgood * possibilityOfCgood) > (pXgivenCbad * possibilityOfCbad)) {
 			return (double) 1;
 		}
