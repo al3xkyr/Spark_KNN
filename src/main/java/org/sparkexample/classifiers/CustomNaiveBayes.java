@@ -46,8 +46,9 @@ public class CustomNaiveBayes {
         AccuracyManager accuracyManager = new AccuracyManager();
         InitialParameters baseModel = new InitialParameters(trainingData);
         System.out.println(baseModel.toString());
-
-        double accuracyOfInitModel = accuracyManager.getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
+        accuracyManager.setList(initTestDataCollected);
+        accuracyManager.setBaseModel(baseModel);
+        double accuracyOfInitModel = accuracyManager.getAccuracy();
 
         // training the knn classifier
         KNNClassification knnClassifier = new KNNClassification(trainingData, sc1);
@@ -78,8 +79,9 @@ public class CustomNaiveBayes {
         ammendWithRightdata.ammend();
         System.out.println(ammendWithRightdata.toString());
 
-        AccuracyManager accuracyManager1 = new AccuracyManager();
-        double acccuracyOfAmmendedGoodData = accuracyManager1.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
+
+        accuracyManager.setAmmendedClassifier(ammendWithRightdata);
+        double acccuracyOfAmmendedGoodData = accuracyManager.getAccuracy();
         System.out.println(ammendWithRightdata.toString());
 
 
@@ -94,9 +96,9 @@ public class CustomNaiveBayes {
                 countOfTrainingData);
 
         ammendWithKNNdata.ammend();
-        AccuracyManager accuracyManager2 = new AccuracyManager();
 
-        List<PojoRow> crossValidatedData = accuracyManager2.getCrossValidatedTweets(knnDataForAmmending, baseModel);
+        accuracyManager.setList(knnDataForAmmending);
+        List<PojoRow> crossValidatedData = accuracyManager.getCrossValidatedTweets();
         AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
                 , possibilitiesX1C0,
                 possibilitiesX0C1,
@@ -109,9 +111,10 @@ public class CustomNaiveBayes {
         // --------------end of sums ---------------and probabilities
         // calculating accuracy of Naive old model in testDataForValidation
 
-
-        double accuracyOfAmmendedWithKNNPredictions = accuracyManager2.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
-        double accuracyOfAmmendedWithCrossValidatedData = accuracyManager2.getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
+        accuracyManager.setAmmendedClassifier(ammendWithKNNdata);
+        double accuracyOfAmmendedWithKNNPredictions = accuracyManager.getAccuracy();
+        accuracyManager.setAmmendedClassifier(ammendWithCrossValidatedData);
+        double accuracyOfAmmendedWithCrossValidatedData = accuracyManager.getAccuracy();
         ///==================================Ideal scenario of ammending good data======================================================
 
 
