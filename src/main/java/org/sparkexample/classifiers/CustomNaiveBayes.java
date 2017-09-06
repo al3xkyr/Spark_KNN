@@ -22,7 +22,6 @@ public class CustomNaiveBayes {
 		SparkContext sc1 = new SparkContext(sparkConf);
 		@SuppressWarnings("resource")
 		SparkSession sparkSession = new SparkSession(sc1);
-
 		// Load and parse the data file.
 		// Training data 40k tweets
 		String trainingDatapath = "data/60000tweetsTrain.csv";
