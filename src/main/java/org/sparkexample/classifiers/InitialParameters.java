@@ -1,6 +1,7 @@
 package org.sparkexample.classifiers;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.apache.spark.api.java.JavaRDD;
@@ -237,5 +238,18 @@ public class InitialParameters implements Serializable {
 
 	public void setBadTweetNumber(double badTweetNumber) {
 		this.badTweetNumber = badTweetNumber;
+	}
+
+
+
+
+	@Override
+	public String toString() {
+		return "InitialParameters [possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
+				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad)
+				+ ", possibilityOfXEq0givenCgood=" + Arrays.toString(possibilityOfXEq0givenCgood)
+				+ ", possibilityOfXEq0givenCbad=" + Arrays.toString(possibilityOfXEq0givenCbad) + ", posCgood="
+				+ posCgood + ", posCbad=" + posCbad + ", goodTweetNumber=" + goodTweetNumber + ", badTweetNumber="
+				+ badTweetNumber + "]";
 	}
 }

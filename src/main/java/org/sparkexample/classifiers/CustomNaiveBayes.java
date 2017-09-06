@@ -47,6 +47,7 @@ public class CustomNaiveBayes {
 		List<PojoRow> initTestDataCollected = initTestData.collect();
 		// creating the initial model
 		 final InitialParameters baseModel = new InitialParameters(trainingData);
+		 System.out.println(baseModel.toString());
 		 double accuracyOfInitModel = getAccuracyOnaSetWithInitalParameter(initTestDataCollected, baseModel);
 		 
 		 // training the knn classifier
@@ -73,6 +74,7 @@ public class CustomNaiveBayes {
 				posBad, goodNumber, badNumber,
 				rightDataforAmmending, 
 				trainingData.count());
+		 System.out.println(ammendWithRightdata.toString());
 		 double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
 		
 		 List<PojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);

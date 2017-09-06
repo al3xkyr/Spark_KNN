@@ -1,6 +1,7 @@
 package org.sparkexample.classifiers;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.sparkexample.pojo.PojoRow;
@@ -44,6 +45,8 @@ public class AmmendManager {
 				this.numberOfCbad = this.numberOfCbad + 1;
 				this.posCgood = ((s / (s + 1)) * this.posCgood);
 				this.posCbad = ((s / (s + 1)) * this.posCbad) + (1 / (s + 1));
+				this.setPXc(tweet);
+
 			}
 		}
 	}
@@ -144,6 +147,16 @@ public class AmmendManager {
 
 	public void setNumberOfCbad(double numberOfCbad) {
 		this.numberOfCbad = numberOfCbad;
+	}
+
+	@Override
+	public String toString() {
+		return "AmmendManager [possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
+				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad)
+				+ ", possibilityOfXEq0givenCgood=" + Arrays.toString(possibilityOfXEq0givenCgood)
+				+ ", possibilityOfXEq0givenCbad=" + Arrays.toString(possibilityOfXEq0givenCbad) + ", posCgood="
+				+ posCgood + ", posCbad=" + posCbad + ", numberOfCgood=" + numberOfCgood + ", numberOfCbad="
+				+ numberOfCbad + "]";
 	}
 
 	
