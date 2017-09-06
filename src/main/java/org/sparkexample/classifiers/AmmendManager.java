@@ -8,9 +8,9 @@ import org.sparkexample.pojo.PojoRow;
 
 public class AmmendManager {
 	private double[] possibilityOfXEq1givenCgood;
-	private double[] possibilityOfX흎1givenCbad;
+	private double[] possibilityOfXEq1givenCbad;
 	private double[] possibilityOfXEq0givenCgood;
-	private double[] possibilityOfX흎0givenCbad;
+	private double[] possibilityOfXEq0givenCbad;
 
 	private double posCgood;
 	private double posCbad;
@@ -20,13 +20,13 @@ public class AmmendManager {
 	private List<PojoRow> dataforAmmending;
 	private long trainingDatacount;
 
-	public AmmendManager(double[] possibilityOfXEq1givenCgood, double[] possibilityOfX흎1givenCbad,
-			double[] possibilityOfXEq0givenCgood, double[] possibilityOfX흎0givenCbad, double posCgood, double posCbad,
+	public AmmendManager(double[] possibilityOfXEq1givenCgood, double[] possibilityOfXEq1givenCbad,
+			double[] possibilityOfXEq0givenCgood, double[] possibilityOfXEq0givenCbad, double posCgood, double posCbad,
 			double numberOfCgood, double numberOfCbad, List<PojoRow> dataforAmmending, long trainingDatacount) {
 		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
 		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
-		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
-		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+		this.possibilityOfXEq0givenCbad = possibilityOfXEq0givenCbad;
+		this.possibilityOfXEq1givenCbad = possibilityOfXEq1givenCbad;
 		this.posCbad = posCbad;
 		this.posCgood = posCgood;
 		this.numberOfCgood = numberOfCgood;
@@ -95,23 +95,23 @@ public class AmmendManager {
 				for (int i = 0; i < tweetFeatures.length; i++) {
 					if (tweetFeatures[i] == 1) {
 						// for good tweets with 1
-						double tmp1 = possibilityOfX흎1givenCbad[i];
-						// System.out.println("possibilityOfX흎1givenCbad1=
-						// "+possibilityOfX흎1givenCbad[i]+ "i= "+i);
+						double tmp1 = possibilityOfXEq1givenCbad[i];
+						// System.out.println("possibilityOfXEq1givenCbad1=
+						// "+possibilityOfXEq1givenCbad[i]+ "i= "+i);
 						double newTmp1 = ((m / (m + 1)) * tmp1) + (1 / (m + 1));
-						this.possibilityOfX흎1givenCbad[i] = newTmp1;
-						// System.out.println("possibilityOfX흎1givenCbad=
-						// "+possibilityOfX흎1givenCbad[i]+ "i= "+i);
+						this.possibilityOfXEq1givenCbad[i] = newTmp1;
+						// System.out.println("possibilityOfXEq1givenCbad=
+						// "+possibilityOfXEq1givenCbad[i]+ "i= "+i);
 						// System.out.println("newTmp1= "+newTmp1);
 						// System.out.println(" ");
 						// for good tweets with 0
-						double tmp0 = possibilityOfX흎0givenCbad[i];
-						// System.out.println("possibilityOfX흎0givenCbad1=
-						// "+possibilityOfX흎0givenCbad[i]+ "i= "+i);
+						double tmp0 = possibilityOfXEq0givenCbad[i];
+						// System.out.println("possibilityOfXEq0givenCbad1=
+						// "+possibilityOfXEq0givenCbad[i]+ "i= "+i);
 						double newTmp0 = ((m / (m + 1)) * tmp0);
-						this.possibilityOfX흎0givenCbad[i] = newTmp0;
-						// System.out.println("possibilityOfX흎0givenCbad=
-						// "+possibilityOfX흎0givenCbad[i]+ "i= "+i);
+						this.possibilityOfXEq0givenCbad[i] = newTmp0;
+						// System.out.println("possibilityOfXEq0givenCbad=
+						// "+possibilityOfXEq0givenCbad[i]+ "i= "+i);
 						// System.out.println("newTmp0= "+newTmp0);
 						// System.out.println(" ");
 					}
@@ -130,12 +130,12 @@ public class AmmendManager {
 		this.possibilityOfXEq1givenCgood = possibilityOfXEq1givenCgood;
 	}
 
-	public double[] getPossibilityOfX흎1givenCbad() {
-		return possibilityOfX흎1givenCbad;
+	public double[] getPossibilityOfXEq1givenCbad() {
+		return possibilityOfXEq1givenCbad;
 	}
 
-	public void setPossibilityOfX흎1givenCbad(double[] possibilityOfX흎1givenCbad) {
-		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+	public void setPossibilityOfXEq1givenCbad(double[] possibilityOfXEq1givenCbad) {
+		this.possibilityOfXEq1givenCbad = possibilityOfXEq1givenCbad;
 	}
 
 	public double[] getPossibilityOfXEq0givenCgood() {
@@ -146,12 +146,12 @@ public class AmmendManager {
 		this.possibilityOfXEq0givenCgood = possibilityOfXEq0givenCgood;
 	}
 
-	public double[] getPossibilityOfX흎0givenCbad() {
-		return possibilityOfX흎0givenCbad;
+	public double[] getPossibilityOfXEq0givenCbad() {
+		return possibilityOfXEq0givenCbad;
 	}
 
-	public void setPossibilityOfX흎0givenCbad(double[] possibilityOfX흎0givenCbad) {
-		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
+	public void setPossibilityOfXEq0givenCbad(double[] possibilityOfXEq0givenCbad) {
+		this.possibilityOfXEq0givenCbad = possibilityOfXEq0givenCbad;
 	}
 
 	public double getPosCgood() {
@@ -189,7 +189,7 @@ public class AmmendManager {
 	@Override
 	public String toString() {
 		return "AmmendManager [possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
-				+ ", possibilityOfX흎1givenCbad=" + Arrays.toString(possibilityOfX흎1givenCbad) + "]";
+				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad) + "]";
 	}
 
 }

@@ -14,7 +14,7 @@ public class AccuracyManager {
 			double toDouble = p.label; 
 			double prediction = new NaiveBayesModel().classifyUsingBernouliNaive(
 					baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-					baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+					baseModel.getPossibilityOfXEq1givenCbad(), baseModel.getPossibilityOfXEq0givenCbad(),
 					baseModel.getPosCgood(),
 					baseModel.getPosCbad(), p.features.toArray()); 
 			if ( prediction == toDouble){
@@ -33,8 +33,8 @@ public class AccuracyManager {
 			double toDouble = p.label;
 			System.out.println("Ammended 1 given good "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq1givenCgood()));
 //			System.out.println("Ammended 0 given good "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq0givenCgood()));
-//			System.out.println("Ammended 1 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfX흎1givenCbad()));
-//			System.out.println("Ammended 0 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfX흎0givenCbad()));
+//			System.out.println("Ammended 1 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq1givenCbad()));
+//			System.out.println("Ammended 0 given bad "+ Arrays.toString(ammendedClassifier.getPossibilityOfXEq0givenCbad()));
 //			System.out.println("Ammended pos number good"+ ammendedClassifier.getPosCgood());
 //			System.out.println("Ammended pos number bad "+ ammendedClassifier.getPosCbad());
 			
@@ -44,8 +44,8 @@ public class AccuracyManager {
 			double prediction = new NaiveBayesModel().classifyUsingBernouliNaive(
 					ammendedClassifier.getPossibilityOfXEq1givenCgood(), 
 					ammendedClassifier.getPossibilityOfXEq0givenCgood(),
-					ammendedClassifier.getPossibilityOfX흎1givenCbad(), 
-					ammendedClassifier.getPossibilityOfX흎0givenCbad(),
+					ammendedClassifier.getPossibilityOfXEq1givenCbad(), 
+					ammendedClassifier.getPossibilityOfXEq0givenCbad(),
 					ammendedClassifier.getPosCgood(),
 					ammendedClassifier.getPosCbad(), 
 					p.features.toArray());
@@ -64,7 +64,7 @@ public class AccuracyManager {
 		 
 		if(new  NaiveBayesModel().classifyUsingSimpleNaive(
 				 baseModel.getPossibilityOfXEq1givenCgood(), baseModel.getPossibilityOfXEq0givenCgood(),
-				 baseModel.getPossibilityOfX흎1givenCbad(), baseModel.getPossibilityOfX흎0givenCbad(),
+				 baseModel.getPossibilityOfXEq1givenCbad(), baseModel.getPossibilityOfXEq0givenCbad(),
 				 baseModel.getPosCgood(),
 				 baseModel.getPosCbad(), pojo.features.toArray())== pojo.label){
 		validatedList.add(pojo);	

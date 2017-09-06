@@ -17,9 +17,9 @@ public class InitialParameters implements Serializable {
 	
 	
 	private  double[] possibilityOfXEq1givenCgood ;
-	private  double[] possibilityOfX흎1givenCbad ;
+	private  double[] possibilityOfXEq1givenCbad ;
 	private  double[] possibilityOfXEq0givenCgood ;
-	private  double[] possibilityOfX흎0givenCbad ;
+	private  double[] possibilityOfXEq0givenCbad ;
 	
 	
 	private double posCgood;
@@ -99,8 +99,8 @@ public class InitialParameters implements Serializable {
 		
 		this.possibilityOfXEq1givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, true).features.toArray();
 		this.possibilityOfXEq0givenCgood = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, goodTweetMapNumber, false).features.toArray();
-		this.possibilityOfX흎1givenCbad = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfBadTweets, badTweetMapNumber, true).features.toArray();
-		this.possibilityOfX흎0givenCbad =  addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, badTweetMapNumber, false).features.toArray();
+		this.possibilityOfXEq1givenCbad = addPosibilitiesBasedOnSumsTweets(pojoOfSumOfBadTweets, badTweetMapNumber, true).features.toArray();
+		this.possibilityOfXEq0givenCbad =  addPosibilitiesBasedOnSumsTweets(pojoOfSumOfGoodTweets, badTweetMapNumber, false).features.toArray();
 	}
 	/**
 	 * This method exist to calclulate the initial P(X|C) 
@@ -144,15 +144,15 @@ public class InitialParameters implements Serializable {
 
 
 
-	public double[] getPossibilityOfX흎1givenCbad() {
-		return possibilityOfX흎1givenCbad;
+	public double[] getPossibilityOfXEq1givenCbad() {
+		return possibilityOfXEq1givenCbad;
 	}
 
 
 
 
-	public void setPossibilityOfX흎1givenCbad(double[] possibilityOfX흎1givenCbad) {
-		this.possibilityOfX흎1givenCbad = possibilityOfX흎1givenCbad;
+	public void setPossibilityOfXEq1givenCbad(double[] possibilityOfXEq1givenCbad) {
+		this.possibilityOfXEq1givenCbad = possibilityOfXEq1givenCbad;
 	}
 
 
@@ -172,15 +172,15 @@ public class InitialParameters implements Serializable {
 
 
 
-	public double[] getPossibilityOfX흎0givenCbad() {
-		return possibilityOfX흎0givenCbad;
+	public double[] getPossibilityOfXEq0givenCbad() {
+		return possibilityOfXEq0givenCbad;
 	}
 
 
 
 
-	public void setPossibilityOfX흎0givenCbad(double[] possibilityOfX흎0givenCbad) {
-		this.possibilityOfX흎0givenCbad = possibilityOfX흎0givenCbad;
+	public void setPossibilityOfXEq0givenCbad(double[] possibilityOfXEq0givenCbad) {
+		this.possibilityOfXEq0givenCbad = possibilityOfXEq0givenCbad;
 	}
 
 
@@ -245,7 +245,7 @@ public class InitialParameters implements Serializable {
 	@Override
 	public String toString() {
 		return "possibilityOfXEq1givenCgood=" + Arrays.toString(possibilityOfXEq1givenCgood)
-				+ ", possibilityOfX흎1givenCbad=" + Arrays.toString(possibilityOfX흎1givenCbad) + "]";
+				+ ", possibilityOfXEq1givenCbad=" + Arrays.toString(possibilityOfXEq1givenCbad) + "]";
 	}
 	
 	

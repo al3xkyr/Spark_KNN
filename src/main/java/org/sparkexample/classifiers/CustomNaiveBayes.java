@@ -59,9 +59,9 @@ public class CustomNaiveBayes {
 		 //System.out.println("pernaei apo close ");
 		 //storing variables in order to isolate them 
 		 double[] possibilitiesX1C1 = baseModel.getPossibilityOfXEq1givenCgood();
-		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfXÅq1givenCbad();
+		 double[] possibilitiesX1C0 = baseModel.getPossibilityOfXEq1givenCbad();
 		 double[] possibilitiesX0C1 = baseModel.getPossibilityOfXEq0givenCgood();
-		 double[] possibilitiesX0C0 = baseModel.getPossibilityOfXÅq0givenCbad();
+		 double[] possibilitiesX0C0 = baseModel.getPossibilityOfXEq0givenCbad();
 		 double posGood = baseModel.getPosCgood();
 		 double posBad = baseModel.getPosCbad();
 		 double goodNumber = baseModel.getGoodTweetNumber();
