@@ -98,6 +98,7 @@ public class CustomNaiveBayes {
         ammendWithKNNdata.ammend();
 
         accuracyManager.setList(knnDataForAmmending);
+        accuracyManager.setBaseModel(baseModel);
         List<PojoRow> crossValidatedData = accuracyManager.getCrossValidatedTweets();
         AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
                 , possibilitiesX1C0,
@@ -112,8 +113,10 @@ public class CustomNaiveBayes {
         // calculating accuracy of Naive old model in testDataForValidation
 
         accuracyManager.setAmmendedClassifier(ammendWithKNNdata);
+        accuracyManager.setList(initTestDataCollected);
         double accuracyOfAmmendedWithKNNPredictions = accuracyManager.getAccuracy();
         accuracyManager.setAmmendedClassifier(ammendWithCrossValidatedData);
+        accuracyManager.setList(initTestDataCollected);
         double accuracyOfAmmendedWithCrossValidatedData = accuracyManager.getAccuracy();
         ///==================================Ideal scenario of ammending good data======================================================
 
