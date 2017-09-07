@@ -14,6 +14,7 @@ import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.sparkexample.pojo.ExtendedPojoRow;
 import org.sparkexample.pojo.PojoRow;
 
 import scala.Tuple2;
@@ -42,7 +43,7 @@ public class KNNClassification implements Serializable {
 		// Creation of Dataset of testData for KNN
 		
 	}
-	public List<PojoRow> getPredictedRDD (JavaRDD<PojoRow> testDataForValidation){
+	public List<ExtendedPojoRow> getPredictedRDD (JavaRDD<PojoRow> testDataForValidation){
 		Dataset<Row> labeledPointDatasetforTest = sqlSpark.createDataFrame(testDataForValidation, PojoRow.class);
 
 		Dataset<Row> sss = model.transform(labeledPointDatasetforTest);
@@ -70,15 +71,16 @@ public class KNNClassification implements Serializable {
 		System.out.println("the accuaracy of knn is " + accuracyOfKNNOntestDataForValidation);
 
 		// creating new rdd with label the prediction on test data
-		JavaRDD<PojoRow> trainDataForNaiveWithPredictionsOfKNN = j32.select("prediction", "features").toJavaRDD()
-				.map(new Function<Row, PojoRow>() {
+		JavaRDD<ExtendedPojoRow> trainDataForNaiveWithPredictionsOfKNN = j32.select("prediction", "features", "label").toJavaRDD()
+				.map(new Function<Row, ExtendedPojoRow>() {
 
-					public PojoRow call(Row t) throws Exception {
+					public ExtendedPojoRow call(Row t) throws Exception {
 						// TODO Auto-generated method stub
-						return new PojoRow((Double) t.get(0), (Vector) t.get(1));
+						PojoRow pojo = new PojoRow((Double) t.get(2), (Vector) t.get(1));
+						return new  ExtendedPojoRow(pojo, (Double) t.get(0));
 					}
 				});
-		List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN
+		List<ExtendedPojoRow> traindataCollectedwithLabelFromKNNFromTestData = trainDataForNaiveWithPredictionsOfKNN
 				.collect();
 		// List<PojoRow> traindataCollectedwithLabelFromKNNFromTestData =
 		// testData.collect();

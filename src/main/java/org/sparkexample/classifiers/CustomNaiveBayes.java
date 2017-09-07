@@ -5,14 +5,11 @@ import java.util.List;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.SparkSession;
+import org.sparkexample.pojo.ExtendedPojoRow;
 import org.sparkexample.pojo.PojoRow;
-
-import scala.Tuple2;
 
 public class CustomNaiveBayes {
 	public static void main(String[] args) {
@@ -77,47 +74,48 @@ public class CustomNaiveBayes {
 		 System.out.println(ammendWithRightdata.toString());
 		 double acccuracyOfAmmendedGoodData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithRightdata);
 		
-		 List<PojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);
-		 AmmendManager ammendWithKNNdata = new AmmendManager(possibilitiesX1C1
-					, possibilitiesX1C0, 
-					possibilitiesX0C1, 
-					possibilitiesX0C0, 
-					posGood, 
-					posBad, goodNumber, badNumber,
-				knnDataForAmmending, 
-				trainingData.count());
-		 
-		 List<PojoRow> crossValidatedData = getCrossValidatedTweets(knnDataForAmmending, baseModel);
-		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
-					, possibilitiesX1C0, 
-					possibilitiesX0C1, 
-					possibilitiesX0C0, 
-					posGood, 
-					posBad, goodNumber, badNumber,
-				crossValidatedData,
-				trainingData.count());
-		
-		// --------------end of sums ---------------and probabilities
-		// calculating accuracy of Naive old model in testDataForValidation
-		
-		
-		
-		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
-		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
-		///==================================Ideal scenario of ammending good data======================================================
-		
-		
-		/// ==================================================Scenario of KNN data =================================================
-		
-		System.out.println("The accuracy of Old naive model with dataForValidation is "
-				+ accuracyOfInitModel);
-		
-		System.out.println("The optimal accuracy after the ammend of ammendedDataForOptimalAccuracy " + acccuracyOfAmmendedGoodData);
-			
-		
-		System.out.println( "The accuracy after the ammend from KNN classifier " + accuracyOfAmmendedWithKNNPredictions);
-		
-		System.out.println("The accuracy after the data validated is " + accuracyOfAmmendedWithCrossValidatedData);
+		 List<ExtendedPojoRow> knnDataForAmmending = knnClassifier.getPredictedRDD(ammendedDataForKNNAccuracy);
+		 System.out.println("dummmy");
+//		 AmmendManager ammendWithKNNdata = new AmmendManager(possibilitiesX1C1
+//					, possibilitiesX1C0, 
+//					possibilitiesX0C1, 
+//					possibilitiesX0C0, 
+//					posGood, 
+//					posBad, goodNumber, badNumber,
+//				knnDataForAmmending, 
+//				trainingData.count());
+//		 
+//		 List<PojoRow> crossValidatedData = getCrossValidatedTweets(knnDataForAmmending, baseModel);
+//		 AmmendManager ammendWithCrossValidatedData = new AmmendManager(possibilitiesX1C1
+//					, possibilitiesX1C0, 
+//					possibilitiesX0C1, 
+//					possibilitiesX0C0, 
+//					posGood, 
+//					posBad, goodNumber, badNumber,
+//				crossValidatedData,
+//				trainingData.count());
+//		
+//		// --------------end of sums ---------------and probabilities
+//		// calculating accuracy of Naive old model in testDataForValidation
+//		
+//		
+//		
+//		double accuracyOfAmmendedWithKNNPredictions = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithKNNdata);
+//		double accuracyOfAmmendedWithCrossValidatedData = getAccuracyOnaSetWithAmmendedManager(initTestDataCollected, ammendWithCrossValidatedData);
+//		///==================================Ideal scenario of ammending good data======================================================
+//		
+//		
+//		/// ==================================================Scenario of KNN data =================================================
+//		
+//		System.out.println("The accuracy of Old naive model with dataForValidation is "
+//				+ accuracyOfInitModel);
+//		
+//		System.out.println("The optimal accuracy after the ammend of ammendedDataForOptimalAccuracy " + acccuracyOfAmmendedGoodData);
+//			
+//		
+//		System.out.println( "The accuracy after the ammend from KNN classifier " + accuracyOfAmmendedWithKNNPredictions);
+//		
+//		System.out.println("The accuracy after the data validated is " + accuracyOfAmmendedWithCrossValidatedData);
 
 		}
 	
