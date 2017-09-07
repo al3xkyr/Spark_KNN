@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class ExtendedPojoRow implements Serializable{
 private PojoRow pojo;
-private double prediction;
+private Double prediction;
 
-public ExtendedPojoRow (PojoRow pojo , double prediction){
+public ExtendedPojoRow (PojoRow pojo , Double prediction){
 	this.pojo = pojo;
 	this.prediction = prediction;
 }
@@ -19,7 +19,7 @@ public void setPojo(PojoRow pojo) {
 	this.pojo = pojo;
 }
 
-public double getPrediction() {
+public Double getPrediction() {
 	return prediction;
 }
 
